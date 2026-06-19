@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import type { PublicRoom } from '@watchlink/shared';
 import { Button } from '@/components/ui/Button';
 import { PageSpinner } from '@/components/ui/Spinner';
@@ -23,7 +24,22 @@ import { ApiClientError } from '@/lib/api';
 function RemoteAudioPlayer({ stream }: { stream: MediaStream }) {
   const ref = useRef<HTMLAudioElement>(null);
   useEffect(() => {
-    if (ref.current) ref.current.srcObject = stream;
+    const el = ref.current;
+    if (!el) return;
+    el.srcObject = stream;
+    // `autoPlay` alone is unreliable for streams whose srcObject is set after mount:
+    // some browsers silently refuse to start playback. Kick it off explicitly and
+    // surface a one-tap prompt if the autoplay policy blocks it.
+    el.play().catch(() => {
+      const resume = () => {
+        el.play().catch(() => {});
+        window.removeEventListener('pointerdown', resume);
+        window.removeEventListener('keydown', resume);
+      };
+      toast.info('Tap anywhere to enable voice audio');
+      window.addEventListener('pointerdown', resume);
+      window.addEventListener('keydown', resume);
+    });
   }, [stream]);
   return <audio ref={ref} autoPlay playsInline />;
 }

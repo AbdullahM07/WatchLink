@@ -111,6 +111,8 @@ export function useVoiceChat({ socket, roomCode }: Options): VoiceApi {
         if (stream) addRemote(userId, stream);
       };
       pc.onconnectionstatechange = () => {
+        // Temporary diagnostic: confirms the peer media path actually establishes.
+        console.debug(`[voice] peer ${userId} → ${pc.connectionState}`);
         if (pc.connectionState === 'failed') closePeer(userId);
       };
 
