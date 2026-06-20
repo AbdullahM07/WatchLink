@@ -152,7 +152,7 @@ export function DirectPlayer({
         ref={ref}
         controls={canControl}
         playsInline
-        className="h-full w-full"
+        className="h-full w-full object-contain"
         onError={() => setError(true)}
       />
       {/* Viewers without control can watch but not interact. */}
