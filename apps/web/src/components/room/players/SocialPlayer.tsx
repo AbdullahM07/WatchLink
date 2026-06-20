@@ -12,10 +12,10 @@ interface Props {
 const FRAME_CLASS = 'h-full w-full border-0';
 const ALLOW = 'autoplay; encrypted-media; picture-in-picture; clipboard-write';
 
-/** A landscape 16:9 embed (Facebook video plugin). */
+/** A landscape 16:9 embed (Facebook video / live). */
 function WideEmbed({ src }: { src: string }) {
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-surface-border bg-black">
+    <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl border border-surface-border bg-black">
       <iframe
         src={src}
         className={FRAME_CLASS}
@@ -28,11 +28,19 @@ function WideEmbed({ src }: { src: string }) {
   );
 }
 
-/** A portrait/variable-height embed (Instagram, X/Twitter) centered on the stage. */
-function PortraitEmbed({ src }: { src: string }) {
+/**
+ * A portrait embed centered on the stage. `reel` is a clean 9:16 video frame
+ * (Facebook/Instagram reels); `card` is a taller, scrollable box for embeds that
+ * include caption chrome (Instagram posts, X/Twitter tweets).
+ */
+function PortraitEmbed({ src, variant = 'reel' }: { src: string; variant?: 'reel' | 'card' }) {
+  const inner =
+    variant === 'reel'
+      ? 'aspect-[9/16] max-h-[82vh] w-full'
+      : 'h-[min(82vh,720px)] w-full overflow-y-auto';
   return (
-    <div className="flex w-full justify-center overflow-hidden rounded-2xl border border-surface-border bg-black">
-      <div className="h-[640px] w-full max-w-[550px] overflow-y-auto">
+    <div className="mx-auto flex w-full max-w-[440px] justify-center overflow-hidden rounded-2xl border border-surface-border bg-black">
+      <div className={inner}>
         <iframe
           src={src}
           className={FRAME_CLASS}
@@ -58,11 +66,15 @@ export function SocialPlayer({ player, resolution }: Props) {
 
   if (provider === 'facebook') {
     const src = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`;
-    embed = <WideEmbed src={src} />;
+    // Facebook Reels are portrait 9:16; regular videos and lives are landscape.
+    const isReel = /\/reel(s)?\//i.test(url);
+    embed = isReel ? <PortraitEmbed src={src} variant="reel" /> : <WideEmbed src={src} />;
   } else if (provider === 'instagram' && embedId) {
-    embed = <PortraitEmbed src={`https://www.instagram.com/${embedId}/embed`} />;
+    // A reel/ ref is a 9:16 video; posts (p/) and IGTV (tv/) embed as taller cards.
+    const variant = embedId.startsWith('reel/') ? 'reel' : 'card';
+    embed = <PortraitEmbed src={`https://www.instagram.com/${embedId}/embed`} variant={variant} />;
   } else if (provider === 'twitter' && embedId) {
-    embed = <PortraitEmbed src={`https://platform.twitter.com/embed/Tweet.html?id=${embedId}&theme=dark`} />;
+    embed = <PortraitEmbed src={`https://platform.twitter.com/embed/Tweet.html?id=${embedId}&theme=dark`} variant="card" />;
   }
 
   if (!embed) {

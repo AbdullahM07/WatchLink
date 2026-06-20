@@ -41,7 +41,9 @@ export function VideoStage({
 
   return (
     <div className="space-y-3">
-      <div className="relative">
+      {/* Keep the 16:9 stage centred and capped in height so it never grows
+          taller than the viewport on wide screens. */}
+      <div className="relative mx-auto w-full max-w-[calc(85vh*16/9)]">
         {hasMedia ? (
           <CinemaPlayer
             player={room.player}

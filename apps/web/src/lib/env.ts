@@ -5,25 +5,35 @@
 export const clientEnv = {
   apiUrl: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api',
   socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL ?? 'http://localhost:4000',
-  stunUrl: process.env.NEXT_PUBLIC_STUN_URL ?? 'stun:stun.l.google.com:19302',
-  turnUrl: process.env.NEXT_PUBLIC_TURN_URL ?? '',
-  turnUsername: process.env.NEXT_PUBLIC_TURN_USERNAME ?? '',
-  turnPassword: process.env.NEXT_PUBLIC_TURN_PASSWORD ?? '',
 };
 
 /**
- * ICE servers for WebRTC voice. STUN is enough for most same-network / simple-NAT
- * calls; add a TURN server (via NEXT_PUBLIC_TURN_*) for reliable cross-NAT relay.
+ * ICE servers for WebRTC voice.
+ *
+ * STUN alone is enough for same-network calls, but cross-network voice (especially
+ * mobile / CGNAT, where peers can't reach each other directly) needs a TURN relay.
+ * We ship a Metered TURN config that exposes the relay over multiple ports
+ * (80 + 443 + TCP/TLS) so voice survives strict mobile networks and firewalls.
+ *
+ * NOTE: TURN credentials are necessarily exposed to the browser — WebRTC needs them
+ * client-side — so keeping them in the bundle is no less safe than a NEXT_PUBLIC_*
+ * env var. Rotate/replace them from the Metered dashboard if usage runs out.
  */
+const TURN_HOST = 'global.relay.metered.ca';
+const TURN_USERNAME = '9644c1f081efc60130ab5311';
+const TURN_CREDENTIAL = 'Flu7bYLI6qb0cndI';
+
 export const iceServers: RTCIceServer[] = [
-  ...(clientEnv.stunUrl ? [{ urls: clientEnv.stunUrl }] : []),
-  ...(clientEnv.turnUrl
-    ? [
-        {
-          urls: clientEnv.turnUrl,
-          username: clientEnv.turnUsername,
-          credential: clientEnv.turnPassword,
-        },
-      ]
-    : []),
+  { urls: 'stun:stun.relay.metered.ca:80' },
+  { urls: 'stun:stun.l.google.com:19302' },
+  {
+    urls: [
+      `turn:${TURN_HOST}:80`,
+      `turn:${TURN_HOST}:80?transport=tcp`,
+      `turn:${TURN_HOST}:443`,
+      `turns:${TURN_HOST}:443?transport=tcp`,
+    ],
+    username: TURN_USERNAME,
+    credential: TURN_CREDENTIAL,
+  },
 ];
