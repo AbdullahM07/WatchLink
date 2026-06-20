@@ -10,11 +10,51 @@ out/
 .next/
 *.tsbuildinfo
 
-# Environment
+# Environment variables (secrets)
 .env
+.env.*
 .env.local
 .env.*.local
+apps/web/.env*
+apps/server/.env*
 !.env.example
+!apps/web/.env.example
+!apps/server/.env.example
+
+# Secrets / credentials / keys / certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.csr
+*.p12
+*.pfx
+*.keystore
+*.jks
+id_rsa
+id_rsa.*
+id_dsa
+id_ecdsa
+id_ed25519
+*.ppk
+secrets/
+secret.*
+*secret*.json
+*credentials*.json
+*-credentials.json
+serviceaccount*.json
+gha-creds-*.json
+.npmrc
+.netrc
+
+# Cloud / deploy
+.vercel/
+.aws/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
 
 # Logs
 logs/
@@ -35,38 +75,7 @@ Thumbs.db
 coverage/
 
 # Misc
-*.pem
 .cache/
 
 # Local dev MongoDB data (mongodb-memory-server)
 .mongo-data/
-
-# Dependencies
-node_modules/
-
-# Build output
-.next/
-dist/
-out/
-coverage/
-
-# Environment variables
-.env
-.env.*
-!.env.example
-apps/web/.env*
-apps/server/.env*
-!apps/web/.env.example
-!apps/server/.env.example
-
-# Vercel
-.vercel/
-
-# Logs
-*.log
-npm-debug.log*
-
-# OS / editors
-.DS_Store
-.vscode/
-.idea/

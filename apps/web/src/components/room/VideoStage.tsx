@@ -1,11 +1,13 @@
 'use client';
 
-import { MonitorPlay } from 'lucide-react';
-import type { Participant, PublicRoom, ReactionEmoji } from '@watchlink/shared';
+import { MonitorPlay, Video, AudioLines } from 'lucide-react';
+import { resolveProvider, type Participant, type PublicRoom, type ReactionEmoji } from '@watchlink/shared';
 import { CinemaPlayer } from './players/CinemaPlayer';
 import { MediaBar } from './MediaBar';
 import { ReactionLayer } from './ReactionLayer';
 import { StagePresence } from './StagePresence';
+import { cn } from '@/lib/cn';
+import { usePlaybackPrefs } from '@/store/playbackPrefs';
 import type { RegisterTimeApi } from '@/lib/players/timeApi';
 import type { FloatingReaction } from '@/store/room';
 
@@ -46,8 +48,20 @@ export function VideoStage({
 }: Props) {
   const hasMedia = Boolean(room.player.mediaUrl);
 
+  // Per-user (local) audio preference — never synced. The source itself can also
+  // be audio-native (radio / podcast), which forces the audio presentation.
+  const audioOnly = usePlaybackPrefs((s) => s.audioOnly);
+  const setAudioOnly = usePlaybackPrefs((s) => s.setAudioOnly);
+  const resolution = hasMedia ? resolveProvider(room.player.mediaUrl ?? '') : null;
+  const isAudioSource = resolution?.kind === 'audio';
+  const audioUi = isAudioSource || audioOnly;
+
   return (
     <div className="space-y-3">
+      {hasMedia && (
+        <ViewToggle audio={audioUi} locked={Boolean(isAudioSource)} onChange={setAudioOnly} />
+      )}
+
       {/* Keep the 16:9 stage centred and capped in height so it never grows
           taller than the viewport on wide screens. */}
       <div className="relative mx-auto w-full max-w-[calc(85vh*16/9)]">
@@ -56,6 +70,7 @@ export function VideoStage({
             player={room.player}
             canControl={canControl}
             syncVersion={syncVersion}
+            audioUi={audioUi}
             onPlay={onPlay}
             onPause={onPause}
             onSeek={onSeek}
@@ -69,11 +84,11 @@ export function VideoStage({
               <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface/60 text-slate-300 ring-1 ring-white/10">
                 <MonitorPlay className="h-7 w-7" />
               </span>
-              <p className="font-medium text-slate-200">No video yet</p>
+              <p className="font-medium text-slate-200">Nothing playing yet</p>
               <p className="max-w-sm px-6 text-sm text-slate-400">
                 {canControl
-                  ? 'Paste a YouTube or direct video link below to start watching together.'
-                  : 'Waiting for the host to pick a video…'}
+                  ? 'Paste a video or audio link below — or tap Quran Radio — to start together.'
+                  : 'Waiting for the host to pick something…'}
               </p>
             </div>
           </div>
@@ -91,6 +106,50 @@ export function VideoStage({
           The host controls playback — your player stays in sync automatically.
         </p>
       )}
+    </div>
+  );
+}
+
+/**
+ * Per-user Video / Audio switch. Local to each viewer — toggling it only changes
+ * what *you* see, never the room. Locked to Audio when the source is audio-only.
+ */
+function ViewToggle({
+  audio,
+  locked,
+  onChange,
+}: {
+  audio: boolean;
+  locked: boolean;
+  onChange: (audioOnly: boolean) => void;
+}) {
+  const base =
+    'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-default';
+  return (
+    <div className="flex justify-end">
+      <div
+        role="group"
+        aria-label="Playback view"
+        className="inline-flex items-center gap-1 rounded-xl border border-surface-border bg-surface-raised/60 p-1"
+      >
+        <button
+          type="button"
+          disabled={locked}
+          aria-pressed={!audio}
+          onClick={() => onChange(false)}
+          className={cn(base, !audio ? 'bg-brand-500/20 text-brand-200' : 'text-slate-400 hover:text-slate-200')}
+        >
+          <Video className="h-3.5 w-3.5" /> Video
+        </button>
+        <button
+          type="button"
+          aria-pressed={audio}
+          onClick={() => onChange(true)}
+          className={cn(base, audio ? 'bg-brand-500/20 text-brand-200' : 'text-slate-400 hover:text-slate-200')}
+        >
+          <AudioLines className="h-3.5 w-3.5" /> Audio
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Link2, ListPlus, MonitorPlay } from 'lucide-react';
-import { resolveProvider } from '@watchlink/shared';
+import { Link2, ListPlus, MonitorPlay, Radio } from 'lucide-react';
+import { QURAN_RADIO, resolveProvider } from '@watchlink/shared';
 import { Button } from '@/components/ui/Button';
 
 interface Props {
@@ -38,8 +38,8 @@ export function MediaBar({ onChangeMedia, onAddToQueue }: Props) {
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste a YouTube link, a direct .mp4 / .webm file, or an .m3u8 live stream"
-            aria-label="Video URL"
+            placeholder="Paste a YouTube link, a direct video / .mp3 audio file, or a live stream"
+            aria-label="Media URL"
             className="h-11 w-full rounded-xl border border-surface-border bg-surface pl-10 pr-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
           />
         </div>
@@ -59,6 +59,22 @@ export function MediaBar({ onChangeMedia, onAddToQueue }: Props) {
             : `Detected: ${resolution.provider}${resolution.mode === 'social' ? ' (social mode)' : ''}`}
         </p>
       )}
+
+      {/* Quick-pick: one tap to start a recitation listening party. */}
+      <div className="mt-2 flex items-center gap-2 border-t border-surface-border/60 pt-2">
+        <span className="text-xs text-slate-500">Quick start</span>
+        <button
+          type="button"
+          onClick={() => onChangeMedia(QURAN_RADIO.url)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface px-2.5 py-1 text-xs font-medium text-slate-200 transition-colors hover:border-brand-500/50 hover:text-brand-200"
+        >
+          <Radio className="h-3.5 w-3.5 text-brand-300" />
+          <span dir="rtl">{QURAN_RADIO.name}</span>
+          <span className="text-slate-500" dir="rtl">
+            · {QURAN_RADIO.subtitle}
+          </span>
+        </button>
+      </div>
     </form>
   );
 }

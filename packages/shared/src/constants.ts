@@ -19,6 +19,16 @@ export const PROVIDERS = [
 /** Viewing modes. Cinema = full playback sync; Social = limited-control embeds. */
 export const VIEWING_MODES = ['cinema', 'social'] as const;
 
+/**
+ * One-tap Quran radio station — a continuous audio stream the host can load for
+ * recitation listening parties. Verified to serve `audio/mpeg`.
+ */
+export const QURAN_RADIO = {
+  name: 'إذاعة القرآن الكريم',
+  subtitle: 'من القاهرة',
+  url: 'https://stream.radiojar.com/8s5u5tpdtwzuv',
+} as const;
+
 /** Player status values. */
 export const PLAYER_STATUSES = ['playing', 'paused', 'ended'] as const;
 

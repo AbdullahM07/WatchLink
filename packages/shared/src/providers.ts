@@ -39,6 +39,17 @@ function extractYouTubeId(url: URL): string | null {
 
 const DIRECT_VIDEO_RE = /\.(mp4|webm|ogg|ogv|m4v|mov)(\?.*)?$/i;
 const HLS_RE = /\.m3u8(\?.*)?$/i;
+const AUDIO_FILE_RE = /\.(mp3|m4a|aac|oga|opus|wav|flac)(\?.*)?$/i;
+
+/**
+ * Hosts that serve continuous, extension-less audio streams (icecast / mp3),
+ * e.g. Quran radio stations and podcast radios. We treat them as direct audio.
+ */
+const RADIO_HOSTS = ['radiojar.com', 'qurango.net', 'mp3quran.net'];
+
+function isRadioHost(host: string): boolean {
+  return RADIO_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
+}
 
 /**
  * Extract the Instagram embed reference (`p/CODE`, `reel/CODE`, `tv/CODE`) from a
@@ -81,6 +92,7 @@ export function resolveProvider(raw: string): ProviderResolution {
       provider: 'unsupported',
       mode: 'cinema',
       canControlPlayback: false,
+      kind: 'video',
       embedId: null,
       reason: 'That doesn’t look like a valid http(s) link.',
     };
@@ -91,36 +103,54 @@ export function resolveProvider(raw: string): ProviderResolution {
   // YouTube
   const ytId = extractYouTubeId(url);
   if (ytId) {
-    return { provider: 'youtube', mode: 'cinema', canControlPlayback: true, embedId: ytId };
+    return { provider: 'youtube', mode: 'cinema', canControlPlayback: true, kind: 'video', embedId: ytId };
+  }
+
+  // Direct audio file (podcasts, recitations) — audio-only by nature.
+  if (AUDIO_FILE_RE.test(url.pathname)) {
+    return { provider: 'direct', mode: 'cinema', canControlPlayback: true, kind: 'audio', embedId: url.toString() };
+  }
+
+  // Continuous audio radio stream (Quran radio, podcast radios) — no file extension.
+  if (isRadioHost(host)) {
+    return { provider: 'direct', mode: 'cinema', canControlPlayback: true, kind: 'audio', embedId: url.toString() };
   }
 
   // Direct video file
   if (DIRECT_VIDEO_RE.test(url.pathname)) {
-    return { provider: 'direct', mode: 'cinema', canControlPlayback: true, embedId: url.toString() };
+    return { provider: 'direct', mode: 'cinema', canControlPlayback: true, kind: 'video', embedId: url.toString() };
   }
 
   // HLS stream (.m3u8) — live matches / streams. Full sync via the same <video> element.
   if (HLS_RE.test(url.pathname)) {
-    return { provider: 'hls', mode: 'cinema', canControlPlayback: true, embedId: url.toString() };
+    return { provider: 'hls', mode: 'cinema', canControlPlayback: true, kind: 'video', embedId: url.toString() };
   }
 
-  // Social platforms — official embeds only, no precise playback sync.
+  // Facebook — regular videos/lives can be synced via the Embedded Video Player
+  // SDK (play/pause/seek). Reels expose no player API, so they stay unsynced.
   if (host === 'facebook.com' || host === 'fb.watch' || host.endsWith('.facebook.com')) {
-    // The official video plugin embeds the original URL directly.
-    return { provider: 'facebook', mode: 'social', canControlPlayback: false, embedId: url.toString() };
+    const isReel = /\/reel(s)?\//i.test(url.pathname);
+    return {
+      provider: 'facebook',
+      mode: isReel ? 'social' : 'cinema',
+      canControlPlayback: !isReel,
+      kind: 'video',
+      embedId: url.toString(),
+    };
   }
   if (host === 'tiktok.com' || host.endsWith('.tiktok.com')) {
-    return { provider: 'tiktok', mode: 'social', canControlPlayback: false, embedId: url.toString() };
+    return { provider: 'tiktok', mode: 'social', canControlPlayback: false, kind: 'video', embedId: url.toString() };
   }
   if (host === 'instagram.com' || host.endsWith('.instagram.com')) {
     const ref = extractInstagramRef(url);
     if (ref) {
-      return { provider: 'instagram', mode: 'social', canControlPlayback: false, embedId: ref };
+      return { provider: 'instagram', mode: 'social', canControlPlayback: false, kind: 'video', embedId: ref };
     }
     return {
       provider: 'unsupported',
       mode: 'cinema',
       canControlPlayback: false,
+      kind: 'video',
       embedId: null,
       reason: 'That Instagram link doesn’t point to a post or reel. Use a /p/, /reel/ or /tv/ link.',
     };
@@ -128,12 +158,13 @@ export function resolveProvider(raw: string): ProviderResolution {
   if (host === 'twitter.com' || host === 'x.com' || host === 'mobile.twitter.com' || host.endsWith('.twitter.com')) {
     const tweetId = extractTweetId(url);
     if (tweetId) {
-      return { provider: 'twitter', mode: 'social', canControlPlayback: false, embedId: tweetId };
+      return { provider: 'twitter', mode: 'social', canControlPlayback: false, kind: 'video', embedId: tweetId };
     }
     return {
       provider: 'unsupported',
       mode: 'cinema',
       canControlPlayback: false,
+      kind: 'video',
       embedId: null,
       reason: 'That X/Twitter link doesn’t point to a tweet. Use a link with /status/.',
     };
@@ -143,7 +174,8 @@ export function resolveProvider(raw: string): ProviderResolution {
     provider: 'unsupported',
     mode: 'cinema',
     canControlPlayback: false,
+    kind: 'video',
     embedId: null,
-    reason: 'This source isn’t supported. Try a YouTube link, a direct .mp4/.webm file, or an .m3u8 stream.',
+    reason: 'This source isn’t supported. Try a YouTube link, a direct .mp4/.webm or .mp3 file, or an .m3u8 stream.',
   };
 }

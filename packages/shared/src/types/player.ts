@@ -43,6 +43,11 @@ export interface ProviderResolution {
   mode: ViewingMode;
   /** Whether this provider supports programmatic play/pause/seek. */
   canControlPlayback: boolean;
+  /**
+   * Whether the source carries a picture or is audio-only (radio, podcast,
+   * direct audio files). Drives the audio-mode presentation on the client.
+   */
+  kind: 'video' | 'audio';
   /** Normalized id/embed reference when applicable (e.g. YouTube video id). */
   embedId: string | null;
   /** Human-readable reason when provider is `unsupported`. */

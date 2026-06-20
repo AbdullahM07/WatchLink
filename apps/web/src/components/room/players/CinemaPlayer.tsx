@@ -4,13 +4,17 @@ import { Film } from 'lucide-react';
 import { resolveProvider, type PlayerState } from '@watchlink/shared';
 import { YouTubePlayer } from './YouTubePlayer';
 import { DirectPlayer } from './DirectPlayer';
+import { FacebookPlayer } from './FacebookPlayer';
 import { SocialPlayer } from './SocialPlayer';
+import { AudioStageOverlay } from './AudioStageOverlay';
 import type { RegisterTimeApi } from '@/lib/players/timeApi';
 
 interface Props {
   player: PlayerState;
   canControl: boolean;
   syncVersion: number;
+  /** Paint the audio presentation over the (still-playing, still-synced) player. */
+  audioUi: boolean;
   onPlay: (t: number) => void;
   onPause: (t: number) => void;
   onSeek: (t: number) => void;
@@ -28,16 +32,34 @@ function Notice({ title, body }: { title: string; body: string }) {
   );
 }
 
-export function CinemaPlayer(props: Props) {
+export function CinemaPlayer({ audioUi, ...props }: Props) {
   const { player } = props;
   const resolution = resolveProvider(player.mediaUrl ?? '');
 
+  // Players that drive a real audio/video element we can hide behind the audio
+  // overlay while keeping playback + sync alive underneath.
+  let inner: React.ReactNode = null;
   if (resolution.provider === 'youtube' && resolution.embedId) {
-    return <YouTubePlayer {...props} embedId={resolution.embedId} />;
+    inner = <YouTubePlayer {...props} embedId={resolution.embedId} />;
+  } else if (resolution.provider === 'direct' || resolution.provider === 'hls') {
+    inner = <DirectPlayer {...props} />;
+  } else if (resolution.provider === 'facebook' && resolution.canControlPlayback) {
+    // Regular Facebook videos sync via the Embedded Video Player SDK.
+    inner = <FacebookPlayer {...props} />;
   }
-  if (resolution.provider === 'direct' || resolution.provider === 'hls') {
-    return <DirectPlayer {...props} />;
+
+  if (inner) {
+    return (
+      <div className="relative">
+        {inner}
+        {audioUi && (
+          <AudioStageOverlay resolution={resolution} isAudioSource={resolution.kind === 'audio'} />
+        )}
+      </div>
+    );
   }
+
+  // Reels and the other social platforms have no playback API — embeds only.
   if (resolution.mode === 'social') {
     return <SocialPlayer player={props.player} canControl={props.canControl} resolution={resolution} />;
   }
