@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MessageSquare, Mic, MonitorPlay, Play, Smile, Users, Zap } from 'lucide-react';
+import { MessageSquare, Mic, MonitorPlay, Play, Smile, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/cn';
@@ -15,11 +15,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="animate-fade-in-up text-center lg:text-left">
-          <span className="inline-flex items-center gap-2 rounded-full border border-accent-500/30 bg-accent-500/10 px-3.5 py-1.5 text-sm font-medium text-accent-200">
-            <Zap className="h-3.5 w-3.5" /> Free · no download · just share a link
-          </span>
-
-          <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.04] tracking-tight text-balance sm:text-6xl">
+          <h1 className="font-display text-5xl font-semibold leading-[1.04] tracking-tight text-balance sm:text-6xl">
             Movie night,
             <br />
             <span className="text-brand-300">wherever everyone is.</span>
