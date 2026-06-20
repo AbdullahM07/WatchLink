@@ -33,6 +33,45 @@ export function DirectPlayer({
   // play/pause/seeked events so a controller doesn't echo them back.
   const suppressUntil = useRef(0);
 
+  const isHls = player.provider === 'hls';
+  const mediaUrl = player.mediaUrl ?? undefined;
+
+  // Attach the media source FIRST (before the sync effects act on it). Plain files —
+  // and HLS on browsers with native support (Safari/iOS) — use the <video> src directly.
+  // Other browsers need hls.js to play .m3u8 over MSE. Either way the same <video>
+  // element drives all the sync logic below.
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || !mediaUrl) return;
+    setError(false);
+
+    const nativeHls = v.canPlayType('application/vnd.apple.mpegurl') !== '';
+    if (!isHls || nativeHls) {
+      v.src = mediaUrl;
+      return;
+    }
+
+    let destroyed = false;
+    let hls: import('hls.js').default | null = null;
+    void import('hls.js').then(({ default: Hls }) => {
+      if (destroyed) return;
+      if (!Hls.isSupported()) {
+        setError(true);
+        return;
+      }
+      hls = new Hls();
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) setError(true);
+      });
+      hls.loadSource(mediaUrl);
+      hls.attachMedia(v);
+    });
+    return () => {
+      destroyed = true;
+      hls?.destroy();
+    };
+  }, [mediaUrl, isHls]);
+
   // Controllers report their local control actions upward.
   useEffect(() => {
     const v = ref.current;
@@ -111,7 +150,6 @@ export function DirectPlayer({
     <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-surface-border bg-black">
       <video
         ref={ref}
-        src={player.mediaUrl ?? undefined}
         controls={canControl}
         playsInline
         className="h-full w-full"

@@ -30,7 +30,7 @@ export function MediaBar({ onChangeMedia }: Props) {
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste a YouTube link or a direct .mp4 / .webm URL"
+            placeholder="Paste a YouTube link, a direct .mp4 / .webm file, or an .m3u8 live stream"
             aria-label="Video URL"
             className="h-11 w-full rounded-xl border border-surface-border bg-surface pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/60"
           />

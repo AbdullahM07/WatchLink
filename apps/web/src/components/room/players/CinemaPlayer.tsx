@@ -34,7 +34,7 @@ export function CinemaPlayer(props: Props) {
   if (resolution.provider === 'youtube' && resolution.embedId) {
     return <YouTubePlayer {...props} embedId={resolution.embedId} />;
   }
-  if (resolution.provider === 'direct') {
+  if (resolution.provider === 'direct' || resolution.provider === 'hls') {
     return <DirectPlayer {...props} />;
   }
   if (resolution.mode === 'social') {

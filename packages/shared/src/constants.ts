@@ -8,6 +8,7 @@
 export const PROVIDERS = [
   'youtube',
   'direct',
+  'hls',
   'facebook',
   'tiktok',
   'instagram',

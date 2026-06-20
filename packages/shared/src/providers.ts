@@ -38,6 +38,7 @@ function extractYouTubeId(url: URL): string | null {
 }
 
 const DIRECT_VIDEO_RE = /\.(mp4|webm|ogg|ogv|m4v|mov)(\?.*)?$/i;
+const HLS_RE = /\.m3u8(\?.*)?$/i;
 
 /**
  * Classify a media URL into a provider and how it can be played.
@@ -71,6 +72,11 @@ export function resolveProvider(raw: string): ProviderResolution {
     return { provider: 'direct', mode: 'cinema', canControlPlayback: true, embedId: url.toString() };
   }
 
+  // HLS stream (.m3u8) — live matches / streams. Full sync via the same <video> element.
+  if (HLS_RE.test(url.pathname)) {
+    return { provider: 'hls', mode: 'cinema', canControlPlayback: true, embedId: url.toString() };
+  }
+
   // Social platforms — official embeds only, limited control (phase 5).
   if (host === 'facebook.com' || host === 'fb.watch' || host.endsWith('.facebook.com')) {
     return { provider: 'facebook', mode: 'social', canControlPlayback: false, embedId: url.toString() };
@@ -87,6 +93,6 @@ export function resolveProvider(raw: string): ProviderResolution {
     mode: 'cinema',
     canControlPlayback: false,
     embedId: null,
-    reason: 'This source isn’t supported. Try a YouTube link or a direct .mp4/.webm URL.',
+    reason: 'This source isn’t supported. Try a YouTube link, a direct .mp4/.webm file, or an .m3u8 stream.',
   };
 }
