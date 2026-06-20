@@ -52,8 +52,8 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-lg py-4 animate-fade-in">
-      <h1 className="text-2xl font-bold">Profile</h1>
-      <p className="mt-1 text-sm text-slate-400">Manage how others see you in rooms.</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Profile</h1>
+      <p className="mt-2 text-sm text-slate-300">Manage how others see you in rooms.</p>
 
       <div className="mt-6 flex items-center gap-4">
         {user.avatar ? (

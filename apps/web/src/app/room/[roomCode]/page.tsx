@@ -10,6 +10,7 @@ import { PageSpinner } from '@/components/ui/Spinner';
 import { RoomHeader } from '@/components/room/RoomHeader';
 import { VideoStage } from '@/components/room/VideoStage';
 import { ProgressBar } from '@/components/room/ProgressBar';
+import { QueuePanel } from '@/components/room/QueuePanel';
 import { ParticipantList } from '@/components/room/ParticipantList';
 import { SidePanel } from '@/components/room/SidePanel';
 import { JoinGate } from '@/components/room/JoinGate';
@@ -19,6 +20,7 @@ import { useRoomConnection } from '@/hooks/useRoomConnection';
 import { useVoiceChat, type RemoteAudio } from '@/hooks/useVoiceChat';
 import { getRoomRequest } from '@/lib/rooms-api';
 import { ApiClientError } from '@/lib/api';
+import { cn } from '@/lib/cn';
 
 /** Plays a peer's remote audio stream. Rendered at page level so it survives tab switches. */
 function RemoteAudioPlayer({ stream }: { stream: MediaStream }) {
@@ -148,6 +150,9 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
   const selfParticipant = conn.participants.find((p) => p.userId === conn.selfId);
   const canControl = amHost || Boolean(selfParticipant?.canControl);
   const hasMedia = Boolean(room.player.mediaUrl);
+  // "Lights down": once playback starts, secondary chrome recedes so the film
+  // owns the room. It eases back to full opacity on hover/focus.
+  const isPlaying = hasMedia && room.player.status === 'playing';
 
   if (!conn.room && (conn.status === 'connecting' || conn.status === 'joining')) {
     return <PageSpinner />;
@@ -155,7 +160,9 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <RoomHeader room={room} amHost={amHost} status={conn.status} onToggleLock={conn.setLocked} />
+      <div className={cn(isPlaying && 'lights-down')}>
+        <RoomHeader room={room} amHost={amHost} status={conn.status} onToggleLock={conn.setLocked} />
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
         <div className="space-y-4">
@@ -163,11 +170,14 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
             room={room}
             canControl={canControl}
             syncVersion={conn.playerVersion}
+            participants={conn.participants}
+            selfId={conn.selfId}
             reactions={conn.reactions}
             onPlay={conn.play}
             onPause={conn.pause}
             onSeek={conn.seek}
             onChangeMedia={conn.changeMedia}
+            onAddToQueue={conn.addToQueue}
             onRequestSync={conn.requestSync}
             onRegisterTime={registerTime}
             onReact={conn.sendReaction}
@@ -182,21 +192,29 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
               onJump={conn.seek}
             />
           )}
-          <div className="rounded-2xl border border-surface-border bg-surface-raised/60 p-3">
-            <ParticipantList
-              participants={conn.participants}
-              selfId={conn.selfId}
-              hostId={room.hostId}
-              amHost={amHost}
-              onKick={conn.kick}
-              onTransfer={conn.transferHost}
-              onGrantControl={conn.grantControl}
-              onRevokeControl={conn.revokeControl}
+          <div className={cn('space-y-4', isPlaying && 'lights-down')}>
+            <QueuePanel
+              queue={conn.queue}
+              canControl={canControl}
+              onPlayNext={conn.playNext}
+              onRemove={conn.removeFromQueue}
             />
+            <div className="rounded-2xl border border-surface-border bg-surface-raised/60 p-3">
+              <ParticipantList
+                participants={conn.participants}
+                selfId={conn.selfId}
+                hostId={room.hostId}
+                amHost={amHost}
+                onKick={conn.kick}
+                onTransfer={conn.transferHost}
+                onGrantControl={conn.grantControl}
+                onRevokeControl={conn.revokeControl}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="h-[480px] overflow-hidden rounded-2xl border border-surface-border bg-surface-raised/60 lg:h-[calc(100vh-9rem)]">
+        <div className="h-[75vh] overflow-hidden rounded-2xl border border-surface-border bg-surface-raised/60 lg:h-[calc(100vh-9rem)]">
           <SidePanel
             messages={conn.messages}
             notes={conn.notes}

@@ -30,34 +30,36 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold">Welcome back, {user.name} 👋</h1>
-        <p className="mt-1 text-slate-400">Start a room or jump back into one.</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
+          Welcome back, {user.name} 👋
+        </h1>
+        <p className="mt-2 text-slate-300">Start a room or jump back into one.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <button
           onClick={() => router.push('/create')}
-          className="group flex items-center gap-4 rounded-2xl border border-surface-border bg-surface-raised p-6 text-left transition-colors hover:border-brand-600/60"
+          className="group flex items-center gap-4 rounded-2xl border border-brand-500/30 bg-brand-500/10 p-6 text-left transition-colors hover:border-brand-500/60 hover:bg-brand-500/15"
         >
-          <span className="rounded-xl bg-brand-600/15 p-3 text-brand-300">
+          <span className="rounded-xl bg-brand-500/20 p-3 text-brand-200 transition-transform group-hover:scale-105">
             <Plus className="h-6 w-6" />
           </span>
           <span>
             <span className="block font-semibold">Create a room</span>
-            <span className="text-sm text-slate-400">Pick a video and invite friends</span>
+            <span className="text-sm text-slate-300">Pick a video and invite friends</span>
           </span>
         </button>
 
         <button
           onClick={() => router.push('/join')}
-          className="group flex items-center gap-4 rounded-2xl border border-surface-border bg-surface-raised p-6 text-left transition-colors hover:border-brand-600/60"
+          className="group flex items-center gap-4 rounded-2xl border border-surface-border bg-surface-raised p-6 text-left transition-colors hover:border-accent-500/50"
         >
-          <span className="rounded-xl bg-brand-600/15 p-3 text-brand-300">
+          <span className="rounded-xl bg-accent-500/15 p-3 text-accent-200 transition-transform group-hover:scale-105">
             <Tv className="h-6 w-6" />
           </span>
           <span>
             <span className="block font-semibold">Join with a code</span>
-            <span className="text-sm text-slate-400">Enter a 6-character room code</span>
+            <span className="text-sm text-slate-300">Enter a 6-character room code</span>
           </span>
         </button>
       </div>
@@ -68,21 +70,21 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <Mail className="h-5 w-5 text-slate-400" />
             <div>
-              <dt className="text-xs text-slate-500">Email</dt>
+              <dt className="text-xs text-slate-400">Email</dt>
               <dd className="text-sm">{user.email}</dd>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Sparkles className="h-5 w-5 text-slate-400" />
             <div>
-              <dt className="text-xs text-slate-500">Role</dt>
+              <dt className="text-xs text-slate-400">Role</dt>
               <dd className="text-sm capitalize">{user.role}</dd>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <CalendarClock className="h-5 w-5 text-slate-400" />
             <div>
-              <dt className="text-xs text-slate-500">Member since</dt>
+              <dt className="text-xs text-slate-400">Member since</dt>
               <dd className="text-sm">{memberSince}</dd>
             </div>
           </div>
@@ -117,10 +119,19 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-surface-border bg-surface-raised/30 py-14 text-center">
-            <Tv className="h-10 w-10 text-slate-600" />
-            <p className="mt-3 text-slate-400">No rooms yet</p>
-            <p className="text-sm text-slate-500">Create one to get started.</p>
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-surface-border bg-surface-raised/30 px-6 py-14 text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/15 text-brand-200">
+              <Tv className="h-6 w-6" />
+            </span>
+            <p className="mt-4 font-medium text-slate-200">No rooms yet</p>
+            <p className="mt-1 max-w-xs text-sm text-slate-400">
+              Spin up your first room, paste a video link, and share the invite — friends can join
+              in one tap.
+            </p>
+            <Button className="mt-5" size="sm" onClick={() => router.push('/create')}>
+              <Plus className="h-4 w-4" />
+              Create your first room
+            </Button>
           </div>
         )}
       </section>

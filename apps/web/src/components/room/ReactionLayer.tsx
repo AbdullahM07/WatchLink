@@ -27,7 +27,7 @@ export function ReactionLayer({ reactions, onReact, onDone }: Props) {
             key={r.id}
             onAnimationEnd={() => onDone(r.id)}
             style={{ left: `${r.x}%` }}
-            className="absolute bottom-16 -translate-x-1/2 animate-float-up select-none text-3xl drop-shadow-lg sm:text-4xl"
+            className="absolute bottom-16 -translate-x-1/2 animate-float-up select-none text-3xl [filter:drop-shadow(0_2px_8px_rgba(245,158,11,0.35))] sm:text-4xl"
             title={r.name}
           >
             {r.emoji}
@@ -37,7 +37,7 @@ export function ReactionLayer({ reactions, onReact, onDone }: Props) {
 
       {/* Tap bar, bottom-center, above the floating layer. */}
       <div className="pointer-events-auto absolute bottom-3 left-1/2 z-10 -translate-x-1/2">
-        <div className="flex items-center gap-1 rounded-full border border-surface-border bg-surface/70 px-2 py-1 shadow-lg backdrop-blur">
+        <div className="flex items-center gap-0.5 rounded-full border border-white/10 bg-surface/70 px-2 py-1 shadow-lg backdrop-blur">
           {REACTIONS.map((emoji) => (
             <button
               key={emoji}
@@ -45,8 +45,8 @@ export function ReactionLayer({ reactions, onReact, onDone }: Props) {
               onClick={() => onReact(emoji)}
               aria-label={`React ${emoji}`}
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-full text-xl transition',
-                'hover:scale-125 hover:bg-surface-overlay active:scale-95',
+                'flex h-9 w-9 items-center justify-center rounded-full text-xl transition-transform duration-150',
+                'hover:scale-[1.35] hover:bg-accent-500/15 active:scale-95',
               )}
             >
               {emoji}

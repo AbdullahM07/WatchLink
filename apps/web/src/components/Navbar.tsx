@@ -18,10 +18,13 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-surface-border/70 bg-surface/80 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <Clapperboard className="h-6 w-6 text-brand-400" />
-          <span className="text-lg">
-            Watch<span className="text-brand-400">Link</span>
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-lg transition-opacity hover:opacity-90"
+        >
+          <Clapperboard className="h-6 w-6 text-accent-400" />
+          <span className="font-display text-xl font-semibold tracking-tight">
+            Watch<span className="text-brand-300">Link</span>
           </span>
         </Link>
 

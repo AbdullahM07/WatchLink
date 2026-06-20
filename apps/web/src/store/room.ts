@@ -6,6 +6,7 @@ import type {
   Participant,
   PlayerState,
   PublicRoom,
+  QueueItem,
   ReactionEvent,
   RoomNote,
 } from '@watchlink/shared';
@@ -36,6 +37,8 @@ interface RoomState {
   participants: Participant[];
   messages: ChatMessage[];
   notes: RoomNote[];
+  /** "Up next" queue, server-authoritative and shared by everyone in the room. */
+  queue: QueueItem[];
   /** In-flight floating reactions; each removes itself once its animation ends. */
   reactions: FloatingReaction[];
   error: string | null;
@@ -47,6 +50,7 @@ interface RoomState {
   setNotes: (notes: RoomNote[]) => void;
   addNote: (note: RoomNote) => void;
   removeNote: (noteId: string) => void;
+  setQueue: (queue: QueueItem[]) => void;
   setSelf: (selfId: string) => void;
   setRoom: (room: PublicRoom) => void;
   patchRoom: (patch: Partial<PublicRoom>) => void;
@@ -69,6 +73,7 @@ const initial = {
   participants: [],
   messages: [],
   notes: [],
+  queue: [],
   reactions: [],
   error: null,
   playerVersion: 0,
@@ -87,6 +92,7 @@ export const useRoomStore = create<RoomState>((set) => ({
         : { notes: [...s.notes, note].sort((a, b) => a.time - b.time) },
     ),
   removeNote: (noteId) => set((s) => ({ notes: s.notes.filter((n) => n.id !== noteId) })),
+  setQueue: (queue) => set({ queue }),
   setSelf: (selfId) => set({ selfId }),
   setRoom: (room) => set({ room }),
   patchRoom: (patch) => set((s) => (s.room ? { room: { ...s.room, ...patch } } : {})),

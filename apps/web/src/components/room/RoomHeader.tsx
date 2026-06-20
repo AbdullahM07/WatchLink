@@ -48,8 +48,8 @@ export function RoomHeader({ room, amHost, status, onToggleLock }: Props) {
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-surface-border bg-surface-raised/60 px-4 py-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <h1 className="truncate text-lg font-semibold">{room.name}</h1>
-          {room.isLocked && <Lock className="h-4 w-4 text-amber-400" aria-label="Locked" />}
+          <h1 className="truncate font-display text-xl font-semibold tracking-tight">{room.name}</h1>
+          {room.isLocked && <Lock className="h-4 w-4 text-accent-400" aria-label="Locked" />}
         </div>
         <div className="mt-1 flex items-center gap-3 text-sm text-slate-400">
           <span className="inline-flex items-center gap-1.5">
@@ -71,7 +71,7 @@ export function RoomHeader({ room, amHost, status, onToggleLock }: Props) {
             {room.isLocked ? 'Unlock' : 'Lock'}
           </Button>
         )}
-        <Button variant="danger" size="sm" onClick={() => router.push('/dashboard')}>
+        <Button variant="secondary" size="sm" onClick={() => router.push('/dashboard')}>
           <LogOut className="h-4 w-4" />
           Leave
         </Button>

@@ -41,8 +41,8 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto max-w-md py-8 animate-fade-in">
-      <h1 className="text-2xl font-bold">Welcome back</h1>
-      <p className="mt-1 text-sm text-slate-400">Log in to create and join watch rooms.</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Welcome back</h1>
+      <p className="mt-2 text-sm text-slate-300">Log in to create and join watch rooms.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
         <Input
@@ -68,7 +68,7 @@ export default function LoginPage() {
 
       <p className="mt-6 text-center text-sm text-slate-400">
         No account?{' '}
-        <Link href="/register" className="text-brand-400 hover:underline">
+        <Link href="/register" className="font-medium text-brand-300 hover:underline">
           Create one
         </Link>
       </p>

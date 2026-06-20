@@ -13,6 +13,7 @@ import { listNotes } from '../../services/note.service';
 import { Room } from '../../models/Room';
 import { presence } from '../presence';
 import { dropPlayer, hasPlayer, setPlayer, snapshot } from '../playerStore';
+import { clearQueue, listQueue } from '../queueStore';
 import {
   clearRoom as clearGrants,
   grantControl,
@@ -58,6 +59,7 @@ export async function leaveRoom(io: AppServer, socket: AppSocket, roomCode: stri
   if (presence.distinctUserCount(roomCode) === 0) {
     dropPlayer(roomCode);
     clearGrants(roomCode);
+    clearQueue(roomCode);
   }
 
   const room = await Room.findOne({ roomCode });
@@ -129,6 +131,9 @@ export function registerRoomHandlers(io: AppServer, socket: AppSocket): void {
       }
       const playerSnap = snapshot(roomCode);
       if (playerSnap?.mediaUrl) socket.emit('player:sync-state', playerSnap);
+
+      // Bootstrap the joining socket with the current "up next" queue.
+      socket.emit('queue:list', listQueue(roomCode));
 
       socket.to(roomCode).emit('participant:joined', {
         userId: me.id,

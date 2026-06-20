@@ -83,7 +83,7 @@ export function SocialPlayer({ player, resolution }: Props) {
       <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-2xl border border-surface-border bg-black px-6 text-center">
         <Info className="h-8 w-8 text-slate-600" />
         <p className="font-medium text-slate-300">Embed not available</p>
-        <p className="max-w-md text-sm text-slate-500">This platform can’t be embedded yet.</p>
+        <p className="max-w-md text-sm text-slate-400">This platform can’t be embedded yet.</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ export function SocialPlayer({ player, resolution }: Props) {
   return (
     <div className="space-y-2">
       {embed}
-      <p className="flex items-center justify-center gap-1.5 text-center text-xs text-slate-500">
+      <p className="flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
         <Info className="h-3.5 w-3.5" />
         Playback isn’t synced on this platform — press play together.
       </p>

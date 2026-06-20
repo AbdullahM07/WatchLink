@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { SendHorizonal, Trash2 } from 'lucide-react';
+import { MessageSquare, SendHorizonal } from 'lucide-react';
 import type { ChatMessage } from '@watchlink/shared';
 import { MAX_CHAT_LENGTH } from '@watchlink/shared';
 import { formatClock } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import type { VoiceApi } from '@/hooks/useVoiceChat';
+import { IconButton } from '@/components/ui/IconButton';
+import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
 import { VoiceBar } from './VoiceBar';
 
 interface Props {
@@ -50,7 +52,13 @@ export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Prop
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 space-y-3 overflow-y-auto px-3 py-4">
         {messages.length === 0 && (
-          <p className="py-10 text-center text-sm text-slate-500">No messages yet — say hi 👋</p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-overlay text-slate-400">
+              <MessageSquare className="h-5 w-5" />
+            </span>
+            <p className="mt-3 text-sm text-slate-300">No messages yet</p>
+            <p className="mt-0.5 text-xs text-slate-400">Say hi to the room 👋</p>
+          </div>
         )}
         {messages.map((m, i) => {
           const mine = m.userId === selfId;
@@ -68,7 +76,7 @@ export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Prop
                     <span className={cn('text-xs font-medium', mine ? 'text-brand-300' : 'text-slate-300')}>
                       {mine ? 'You' : m.name}
                     </span>
-                    <span className="text-[10px] text-slate-500">{formatClock(m.createdAt)}</span>
+                    <span className="text-[10px] text-slate-400">{formatClock(m.createdAt)}</span>
                   </div>
                 )}
                 <div className={cn('relative inline-flex items-start gap-1', mine && 'flex-row-reverse')}>
@@ -83,13 +91,11 @@ export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Prop
                     {m.text}
                   </p>
                   {(mine || amHost) && (
-                    <button
-                      onClick={() => onDelete(m.id)}
-                      className="mt-1 text-slate-600 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
-                      aria-label="Delete message"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <ConfirmDelete
+                      onConfirm={() => onDelete(m.id)}
+                      label="Delete message"
+                      className="mt-1 opacity-0 group-hover:opacity-100"
+                    />
                   )}
                 </div>
               </div>
@@ -108,16 +114,11 @@ export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Prop
           maxLength={MAX_CHAT_LENGTH}
           placeholder="Type a message…"
           aria-label="Chat message"
-          className="h-10 flex-1 rounded-xl border border-surface-border bg-surface px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/60"
+          className="h-10 flex-1 rounded-xl border border-surface-border bg-surface px-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
         />
-        <button
-          type="submit"
-          disabled={!text.trim()}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white transition hover:bg-brand-500 disabled:opacity-50"
-          aria-label="Send"
-        >
+        <IconButton type="submit" disabled={!text.trim()} variant="brand" aria-label="Send message">
           <SendHorizonal className="h-4 w-4" />
-        </button>
+        </IconButton>
       </form>
     </div>
   );

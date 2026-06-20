@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Clock, Plus, StickyNote, Trash2 } from 'lucide-react';
+import { Clock, Plus, StickyNote } from 'lucide-react';
 import type { RoomNote } from '@watchlink/shared';
 import { MAX_NOTE_LENGTH } from '@watchlink/shared';
 import { formatTimecode } from '@/lib/format';
 import { cn } from '@/lib/cn';
+import { IconButton } from '@/components/ui/IconButton';
+import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
 
 interface Props {
   notes: RoomNote[];
@@ -53,10 +55,14 @@ export function NotesPanel({
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 space-y-2 overflow-y-auto px-3 py-4">
         {notes.length === 0 && (
-          <div className="flex flex-col items-center gap-2 py-10 text-center text-sm text-slate-500">
-            <StickyNote className="h-8 w-8 text-slate-600" />
-            <p>No notes yet.</p>
-            <p className="text-xs">Pin a note to the current moment for everyone to see.</p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-overlay text-accent-300">
+              <StickyNote className="h-5 w-5" />
+            </span>
+            <p className="mt-3 text-sm text-slate-300">No notes yet</p>
+            <p className="mt-0.5 max-w-[15rem] text-xs text-slate-400">
+              Pin a note to the current moment — everyone in the room sees it on the timeline.
+            </p>
           </div>
         )}
         {notes.map((n) => {
@@ -83,13 +89,11 @@ export function NotesPanel({
                 </button>
                 <span className="truncate text-xs text-slate-400">{mine ? 'You' : n.name}</span>
                 {(mine || amHost) && (
-                  <button
-                    onClick={() => onDelete(n.id)}
-                    className="ml-auto text-slate-600 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
-                    aria-label="Delete note"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  <ConfirmDelete
+                    onConfirm={() => onDelete(n.id)}
+                    label="Delete note"
+                    className="ml-auto opacity-0 group-hover:opacity-100"
+                  />
                 )}
               </div>
               <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-200">{n.text}</p>
@@ -114,14 +118,9 @@ export function NotesPanel({
             aria-label="Note text"
             className="h-10 flex-1 rounded-xl border border-surface-border bg-surface px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/60 disabled:opacity-50"
           />
-          <button
-            type="submit"
-            disabled={!text.trim() || !hasMedia}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white transition hover:bg-brand-500 disabled:opacity-50"
-            aria-label="Add note"
-          >
+          <IconButton type="submit" disabled={!text.trim() || !hasMedia} variant="brand" aria-label="Add note">
             <Plus className="h-4 w-4" />
-          </button>
+          </IconButton>
         </div>
       </form>
     </div>

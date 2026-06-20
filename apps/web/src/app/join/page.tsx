@@ -19,8 +19,8 @@ export default function JoinPage() {
 
   return (
     <div className="mx-auto max-w-md py-8 animate-fade-in">
-      <h1 className="text-2xl font-bold">Join a room</h1>
-      <p className="mt-1 text-sm text-slate-400">Enter the {ROOM_CODE_LENGTH}-character room code.</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Join a room</h1>
+      <p className="mt-2 text-sm text-slate-300">Enter the {ROOM_CODE_LENGTH}-character room code.</p>
 
       <form onSubmit={submit} className="mt-8 space-y-4">
         <Input

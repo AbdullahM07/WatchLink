@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Crown, MicOff, MoreVertical, ShieldCheck, ShieldOff, SlidersHorizontal, UserCog, UserMinus } from 'lucide-react';
+import { Crown, MicOff, MoreVertical, Radio, ShieldCheck, ShieldOff, SlidersHorizontal, UserCog, UserMinus } from 'lucide-react';
 import type { Participant } from '@watchlink/shared';
 import { cn } from '@/lib/cn';
+import { Avatar } from './Avatar';
 
 interface Props {
   participants: Participant[];
@@ -14,18 +15,6 @@ interface Props {
   onTransfer: (userId: string) => void;
   onGrantControl: (userId: string) => void;
   onRevokeControl: (userId: string) => void;
-}
-
-function Avatar({ p }: { p: Participant }) {
-  if (p.avatar) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={p.avatar} alt={p.name} className="h-8 w-8 rounded-full object-cover" />;
-  }
-  return (
-    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600/25 text-xs font-semibold text-brand-200">
-      {p.name.slice(0, 2).toUpperCase()}
-    </div>
-  );
 }
 
 export function ParticipantList({
@@ -55,25 +44,25 @@ export function ParticipantList({
               key={p.userId}
               className="group relative flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-surface-overlay"
             >
-              <div className="relative">
-                <Avatar p={p} />
-                <span
-                  className={cn(
-                    'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-surface-raised',
-                    p.isSpeaking ? 'bg-emerald-400' : 'bg-emerald-500/40',
-                  )}
-                  aria-hidden
-                />
-              </div>
+              <Avatar
+                name={p.name}
+                avatar={p.avatar}
+                size="sm"
+                speaking={p.isSpeaking}
+                idleRing="ring-surface-raised"
+              />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm">
                   {p.name}
-                  {isSelf && <span className="ml-1 text-xs text-slate-500">(you)</span>}
+                  {isSelf && <span className="ml-1 text-xs text-slate-400">(you)</span>}
                 </p>
-                {p.isGuest && <p className="text-xs text-slate-500">Guest</p>}
+                {p.isGuest && <p className="text-xs text-slate-400">Guest</p>}
               </div>
 
-              {p.isMuted && <MicOff className="h-3.5 w-3.5 text-slate-500" aria-label="Muted" />}
+              {p.isSpeaking && (
+                <Radio className="h-3.5 w-3.5 animate-live-pulse text-accent-400" aria-label="Speaking" />
+              )}
+              {p.isMuted && <MicOff className="h-3.5 w-3.5 text-slate-400" aria-label="Muted" />}
 
               {/* Controller badge (non-host with control) */}
               {!isHostRow && p.canControl && (

@@ -101,7 +101,7 @@ export function ProgressBar({ timeApi, notes, canControl, onAddNote, onJump }: P
                 onChange={(e) => setText(e.target.value)}
                 maxLength={MAX_NOTE_LENGTH}
                 placeholder="Note at this moment…"
-                className="h-9 flex-1 rounded-lg border border-surface-border bg-surface px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/60"
+                className="h-9 flex-1 rounded-lg border border-surface-border bg-surface px-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
               />
               <button
                 type="submit"
@@ -154,7 +154,7 @@ export function ProgressBar({ timeApi, notes, canControl, onAddNote, onJump }: P
                 }}
                 style={{ left: `${(n.time / duration) * 100}%` }}
                 className={cn(
-                  'absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-amber-400 transition hover:scale-125',
+                  'absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-accent-400 transition hover:scale-125',
                   canControl ? 'cursor-pointer' : 'cursor-default',
                 )}
                 title={`${formatTimecode(n.time)} — ${n.name}: ${n.text}`}

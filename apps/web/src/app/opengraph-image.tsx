@@ -18,9 +18,9 @@ export default function OpengraphImage() {
           justifyContent: 'center',
           padding: '0 96px',
           color: '#ffffff',
-          background: '#0b0b12',
+          background: '#130f1a',
           backgroundImage:
-            'radial-gradient(circle at 82% -12%, rgba(124,58,237,0.50), transparent 48%), radial-gradient(circle at -12% 112%, rgba(139,92,246,0.30), transparent 46%)',
+            'radial-gradient(circle at 82% -12%, rgba(184,90,236,0.50), transparent 48%), radial-gradient(circle at -12% 112%, rgba(245,158,11,0.22), transparent 46%)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
@@ -31,7 +31,7 @@ export default function OpengraphImage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: '#7c3aed',
+              background: '#a23bd8',
               borderRadius: 24,
             }}
           >
@@ -53,7 +53,7 @@ export default function OpengraphImage() {
           Watch videos together, in perfect sync.
         </div>
 
-        <div style={{ fontSize: 34, color: '#a78bfa', marginTop: 28 }}>
+        <div style={{ fontSize: 34, color: '#dfa8fb', marginTop: 28 }}>
           Live chat · reactions · timestamped notes · push-to-talk voice
         </div>
       </div>

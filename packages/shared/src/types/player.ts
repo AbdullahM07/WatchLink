@@ -23,6 +23,20 @@ export interface PlayerState {
   updatedBy: string | null;
 }
 
+/**
+ * A video queued to play after the current one. The host (or a controller) builds
+ * the queue; `queue:next` promotes the head item to the active player.
+ */
+export interface QueueItem {
+  /** Stable id so clients can dedupe / remove a specific entry. */
+  id: string;
+  url: string;
+  provider: Provider;
+  mode: ViewingMode;
+  /** User id that added it (for display / audit). */
+  addedBy: string | null;
+}
+
 /** Result of inspecting a URL: which provider handles it and how. */
 export interface ProviderResolution {
   provider: Provider;

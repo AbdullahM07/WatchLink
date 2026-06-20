@@ -28,7 +28,7 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
   const {
     setStatus, setSelf, setRoom, patchRoom, setParticipants, setParticipantSpeaking,
     setParticipantMuted, setMessages, addMessage, removeMessage, addReaction, removeReaction,
-    setError, applyPlayer, setNotes, addNote, removeNote, reset,
+    setError, applyPlayer, setNotes, addNote, removeNote, setQueue, reset,
   } = store;
 
   // Keep latest join params without re-subscribing listeners on every change.
@@ -85,6 +85,7 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
     socket.on('voice:mute-state', ({ userId, muted }) => setParticipantMuted(userId, muted));
     socket.on('media:changed', (player) => applyPlayer(player));
     socket.on('player:sync-state', (player) => applyPlayer(player));
+    socket.on('queue:list', (items) => setQueue(items));
     socket.on('note:list', (notes) => setNotes(notes));
     socket.on('note:added', (note) => addNote(note));
     socket.on('note:deleted', ({ noteId }) => removeNote(noteId));
@@ -158,6 +159,26 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
     });
   }, [roomCode, applyPlayer]);
 
+  const addToQueue = useCallback((url: string) => {
+    socketRef.current?.emit('queue:add', { roomCode, url }, (res) => {
+      if (res.success) toast.success('Added to queue');
+      else toast.error(res.message);
+    });
+  }, [roomCode]);
+
+  const removeFromQueue = useCallback((id: string) => {
+    socketRef.current?.emit('queue:remove', { roomCode, id }, (res) => {
+      if (!res.success) toast.error(res.message);
+    });
+  }, [roomCode]);
+
+  const playNext = useCallback(() => {
+    socketRef.current?.emit('queue:next', { roomCode }, (res) => {
+      if (res.success && res.data) applyPlayer(res.data);
+      else toast.error(res.message);
+    });
+  }, [roomCode, applyPlayer]);
+
   const play = useCallback((currentTime: number) => {
     socketRef.current?.emit('player:play', { roomCode, currentTime });
   }, [roomCode]);
@@ -206,6 +227,7 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
     participants: store.participants,
     messages: store.messages,
     notes: store.notes,
+    queue: store.queue,
     reactions: store.reactions,
     error: store.error,
     playerVersion: store.playerVersion,
@@ -219,6 +241,9 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
     grantControl,
     revokeControl,
     changeMedia,
+    addToQueue,
+    removeFromQueue,
+    playNext,
     play,
     pause,
     seek,

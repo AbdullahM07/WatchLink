@@ -1,7 +1,22 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, Fraunces } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/providers/Providers';
 import { Navbar } from '@/components/Navbar';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+// Soft, cinematic display serif for marquee / hero / brand moments.
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -57,14 +72,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0b0b12',
+  themeColor: '#130f1a',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${inter.variable} ${fraunces.variable}`}>
       <body>
         <Providers>
           <Navbar />

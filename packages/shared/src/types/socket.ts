@@ -1,7 +1,7 @@
 import type { ApiResponse } from './api';
 import type { ChatMessage, ReactionEmoji, ReactionEvent, RoomNote } from './chat';
 import type { Participant, PublicRoom } from './room';
-import type { PlayerState } from './player';
+import type { PlayerState, QueueItem } from './player';
 
 /**
  * Socket.IO event contracts shared by client and server.
@@ -29,6 +29,16 @@ export interface JoinRoomPayload {
 export interface MediaChangePayload {
   roomCode: string;
   url: string;
+}
+
+export interface QueueAddPayload {
+  roomCode: string;
+  url: string;
+}
+
+export interface QueueRemovePayload {
+  roomCode: string;
+  id: string;
 }
 
 export interface PlayerPlayPayload {
@@ -102,6 +112,7 @@ export interface ServerToClientEvents {
 
   'media:changed': (player: PlayerState) => void;
   'player:sync-state': (player: PlayerState) => void;
+  'queue:list': (items: QueueItem[]) => void;
 
   'chat:message': (message: ChatMessage) => void;
   'chat:history': (messages: ChatMessage[]) => void;
@@ -136,6 +147,9 @@ export interface ClientToServerEvents {
   'room:revoke-control': (payload: HostActionPayload, ack: Ack) => void;
 
   'media:change': (payload: MediaChangePayload, ack: Ack<PlayerState>) => void;
+  'queue:add': (payload: QueueAddPayload, ack: Ack<QueueItem>) => void;
+  'queue:remove': (payload: QueueRemovePayload, ack: Ack) => void;
+  'queue:next': (payload: { roomCode: string }, ack: Ack<PlayerState>) => void;
   'player:play': (payload: PlayerPlayPayload) => void;
   'player:pause': (payload: PlayerPausePayload) => void;
   'player:seek': (payload: PlayerSeekPayload) => void;

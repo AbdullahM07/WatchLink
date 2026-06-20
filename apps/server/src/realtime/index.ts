@@ -11,6 +11,7 @@ import { leaveRoom, registerRoomHandlers } from './handlers/roomHandlers';
 import { registerChatHandlers } from './handlers/chatHandlers';
 import { registerReactionHandlers } from './handlers/reactionHandlers';
 import { registerPlayerHandlers } from './handlers/playerHandlers';
+import { registerQueueHandlers } from './handlers/queueHandlers';
 import { registerNoteHandlers } from './handlers/noteHandlers';
 import { registerVoiceHandlers } from './handlers/voiceHandlers';
 import type { AppServer, AppSocket } from './types';
@@ -39,6 +40,7 @@ export function setupSocket(httpServer: HttpServer): AppServer {
     registerChatHandlers(io!, socket);
     registerReactionHandlers(io!, socket);
     registerPlayerHandlers(io!, socket);
+    registerQueueHandlers(io!, socket);
     registerNoteHandlers(io!, socket);
     registerVoiceHandlers(io!, socket);
 

@@ -41,8 +41,8 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto max-w-md py-8 animate-fade-in">
-      <h1 className="text-2xl font-bold">Create your account</h1>
-      <p className="mt-1 text-sm text-slate-400">Free, takes a few seconds.</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Create your account</h1>
+      <p className="mt-2 text-sm text-slate-300">Free, and takes a few seconds.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
         <Input
@@ -75,7 +75,7 @@ export default function RegisterPage() {
 
       <p className="mt-6 text-center text-sm text-slate-400">
         Already have an account?{' '}
-        <Link href="/login" className="text-brand-400 hover:underline">
+        <Link href="/login" className="font-medium text-brand-300 hover:underline">
           Log in
         </Link>
       </p>

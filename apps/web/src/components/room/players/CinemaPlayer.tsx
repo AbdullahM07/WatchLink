@@ -23,7 +23,7 @@ function Notice({ title, body }: { title: string; body: string }) {
     <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-2xl border border-surface-border bg-black px-6 text-center">
       <Film className="h-10 w-10 text-slate-600" />
       <p className="font-medium text-slate-300">{title}</p>
-      <p className="max-w-md text-sm text-slate-500">{body}</p>
+      <p className="max-w-md text-sm text-slate-400">{body}</p>
     </div>
   );
 }

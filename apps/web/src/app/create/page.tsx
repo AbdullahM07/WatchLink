@@ -53,8 +53,8 @@ export default function CreateRoomPage() {
 
   return (
     <div className="mx-auto max-w-lg py-4 animate-fade-in">
-      <h1 className="text-2xl font-bold">Create a room</h1>
-      <p className="mt-1 text-sm text-slate-400">Set it up, then share the invite link.</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Create a room</h1>
+      <p className="mt-2 text-sm text-slate-300">Set it up, then share the invite link.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
         <Input label="Room name" placeholder="Friday Movie Night" error={errors.name?.message} {...register('name')} />
