@@ -12,6 +12,7 @@ export const PROVIDERS = [
   'facebook',
   'tiktok',
   'instagram',
+  'twitter',
   'unsupported',
 ] as const;
 

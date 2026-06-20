@@ -41,6 +41,33 @@ const DIRECT_VIDEO_RE = /\.(mp4|webm|ogg|ogv|m4v|mov)(\?.*)?$/i;
 const HLS_RE = /\.m3u8(\?.*)?$/i;
 
 /**
+ * Extract the Instagram embed reference (`p/CODE`, `reel/CODE`, `tv/CODE`) from a
+ * post/reel URL, so the player can build `instagram.com/<ref>/embed`.
+ */
+function extractInstagramRef(url: URL): string | null {
+  const parts = url.pathname.split('/').filter(Boolean); // ['reel','CODE'] | ['p','CODE'] | ['tv','CODE']
+  const codeRe = /^[a-zA-Z0-9_-]+$/;
+  if (parts.length >= 2 && ['p', 'reel', 'tv'].includes(parts[0]!) && codeRe.test(parts[1]!)) {
+    return `${parts[0]}/${parts[1]}`;
+  }
+  return null;
+}
+
+/** Extract a numeric tweet id from a twitter.com / x.com status URL. */
+function extractTweetId(url: URL): string | null {
+  const parts = url.pathname.split('/').filter(Boolean); // ['user','status','ID']
+  const statusIdx = parts.indexOf('status');
+  if (statusIdx === -1) {
+    const alt = parts.indexOf('statuses');
+    if (alt === -1) return null;
+    const id = parts[alt + 1];
+    return id && /^\d+$/.test(id) ? id : null;
+  }
+  const id = parts[statusIdx + 1];
+  return id && /^\d+$/.test(id) ? id : null;
+}
+
+/**
  * Classify a media URL into a provider and how it can be played.
  *
  * Cinema mode (full play/pause/seek sync): youtube, direct.
@@ -77,15 +104,39 @@ export function resolveProvider(raw: string): ProviderResolution {
     return { provider: 'hls', mode: 'cinema', canControlPlayback: true, embedId: url.toString() };
   }
 
-  // Social platforms — official embeds only, limited control (phase 5).
+  // Social platforms — official embeds only, no precise playback sync.
   if (host === 'facebook.com' || host === 'fb.watch' || host.endsWith('.facebook.com')) {
+    // The official video plugin embeds the original URL directly.
     return { provider: 'facebook', mode: 'social', canControlPlayback: false, embedId: url.toString() };
   }
   if (host === 'tiktok.com' || host.endsWith('.tiktok.com')) {
     return { provider: 'tiktok', mode: 'social', canControlPlayback: false, embedId: url.toString() };
   }
   if (host === 'instagram.com' || host.endsWith('.instagram.com')) {
-    return { provider: 'instagram', mode: 'social', canControlPlayback: false, embedId: url.toString() };
+    const ref = extractInstagramRef(url);
+    if (ref) {
+      return { provider: 'instagram', mode: 'social', canControlPlayback: false, embedId: ref };
+    }
+    return {
+      provider: 'unsupported',
+      mode: 'cinema',
+      canControlPlayback: false,
+      embedId: null,
+      reason: 'That Instagram link doesn’t point to a post or reel. Use a /p/, /reel/ or /tv/ link.',
+    };
+  }
+  if (host === 'twitter.com' || host === 'x.com' || host === 'mobile.twitter.com' || host.endsWith('.twitter.com')) {
+    const tweetId = extractTweetId(url);
+    if (tweetId) {
+      return { provider: 'twitter', mode: 'social', canControlPlayback: false, embedId: tweetId };
+    }
+    return {
+      provider: 'unsupported',
+      mode: 'cinema',
+      canControlPlayback: false,
+      embedId: null,
+      reason: 'That X/Twitter link doesn’t point to a tweet. Use a link with /status/.',
+    };
   }
 
   return {

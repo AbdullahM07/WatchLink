@@ -4,6 +4,7 @@ import { Film } from 'lucide-react';
 import { resolveProvider, type PlayerState } from '@watchlink/shared';
 import { YouTubePlayer } from './YouTubePlayer';
 import { DirectPlayer } from './DirectPlayer';
+import { SocialPlayer } from './SocialPlayer';
 import type { RegisterTimeApi } from '@/lib/players/timeApi';
 
 interface Props {
@@ -38,12 +39,7 @@ export function CinemaPlayer(props: Props) {
     return <DirectPlayer {...props} />;
   }
   if (resolution.mode === 'social') {
-    return (
-      <Notice
-        title={`${resolution.provider[0]!.toUpperCase()}${resolution.provider.slice(1)} — Social Mode`}
-        body="This platform only allows its official embed, which doesn't support precise playback sync. Social Mode (synchronized reactions & countdown) arrives in a later phase."
-      />
-    );
+    return <SocialPlayer player={props.player} canControl={props.canControl} resolution={resolution} />;
   }
   return <Notice title="Unsupported link" body={resolution.reason ?? 'Try a YouTube or direct video URL.'} />;
 }
