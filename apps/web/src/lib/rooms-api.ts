@@ -27,6 +27,11 @@ export function listMyRoomsRequest(): Promise<{ rooms: PublicRoom[] }> {
   return apiFetch<{ rooms: PublicRoom[] }>('/rooms/mine', { method: 'GET' });
 }
 
+/** Browsable public rooms for the landing page (no auth required). */
+export function listPublicRoomsRequest(): Promise<{ rooms: PublicRoom[] }> {
+  return apiFetch<{ rooms: PublicRoom[] }>('/rooms/public', { method: 'GET', skipAuth: true });
+}
+
 export function updateRoomRequest(
   roomCode: string,
   input: UpdateRoomInput,

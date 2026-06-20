@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { MessageSquare, Mic, MonitorPlay, Play, Smile, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { PublicRooms } from '@/components/landing/PublicRooms';
 import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/cn';
 
@@ -45,6 +46,9 @@ export default function LandingPage() {
         {/* Cinematic stage — shows the vibe instead of describing it. */}
         <StageMock />
       </section>
+
+      {/* Live directory — jump straight into an open room from the landing page. */}
+      <PublicRooms />
 
       {/* Features — a varied bento, not six identical cards. */}
       <section className="mx-auto w-full max-w-6xl">

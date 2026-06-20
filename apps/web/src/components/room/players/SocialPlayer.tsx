@@ -1,6 +1,6 @@
 'use client';
 
-import { Info } from 'lucide-react';
+import { ExternalLink, Info } from 'lucide-react';
 import type { PlayerState, ProviderResolution } from '@watchlink/shared';
 
 interface Props {
@@ -11,6 +11,9 @@ interface Props {
 
 const FRAME_CLASS = 'h-full w-full border-0';
 const ALLOW = 'autoplay; encrypted-media; picture-in-picture; clipboard-write';
+// Let the embed play and pop its own links into a NEW tab, but never let it
+// navigate the whole app window away (the "it sent me back to Facebook" bug).
+const SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation';
 
 /** A landscape 16:9 embed (Facebook video / live). */
 function WideEmbed({ src }: { src: string }) {
@@ -20,6 +23,7 @@ function WideEmbed({ src }: { src: string }) {
         src={src}
         className={FRAME_CLASS}
         allow={ALLOW}
+        sandbox={SANDBOX}
         allowFullScreen
         scrolling="no"
         title="Social video embed"
@@ -45,6 +49,7 @@ function PortraitEmbed({ src, variant = 'reel' }: { src: string; variant?: 'reel
           src={src}
           className={FRAME_CLASS}
           allow={ALLOW}
+          sandbox={SANDBOX}
           allowFullScreen
           title="Social post embed"
         />
@@ -91,10 +96,22 @@ export function SocialPlayer({ player, resolution }: Props) {
   return (
     <div className="space-y-2">
       {embed}
-      <p className="flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
-        <Info className="h-3.5 w-3.5" />
-        Playback isn’t synced on this platform — press play together.
-      </p>
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-xs text-slate-400">
+        <span className="inline-flex items-center gap-1.5">
+          <Info className="h-3.5 w-3.5" />
+          Playback isn’t synced on <span className="capitalize">{provider}</span> — press play together.
+        </span>
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-medium text-brand-300 hover:underline"
+          >
+            Open on <span className="capitalize">{provider}</span> <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
+      </div>
     </div>
   );
 }

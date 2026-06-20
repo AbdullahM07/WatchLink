@@ -82,6 +82,16 @@ export async function listMyRooms(userId: string): Promise<RoomDocument[]> {
     .limit(12);
 }
 
+/**
+ * Public rooms anyone can browse and join from the landing page.
+ * Private rooms are intentionally excluded — they're only reachable by code.
+ */
+export async function listPublicRooms(): Promise<RoomDocument[]> {
+  return Room.find({ isPrivate: false })
+    .sort({ updatedAt: -1 })
+    .limit(24);
+}
+
 /** Push the room's expiry forward (called on activity like joins). */
 export async function touchRoom(roomCode: string): Promise<void> {
   await Room.updateOne({ roomCode }, { $set: { expiresAt: nextExpiry() } });

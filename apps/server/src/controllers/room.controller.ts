@@ -9,6 +9,7 @@ import {
   deleteRoom,
   getRoomByCode,
   listMyRooms,
+  listPublicRooms,
   updateRoom,
 } from '../services/room.service';
 
@@ -53,6 +54,15 @@ export const patch = asyncHandler(async (req: Request, res: Response) => {
 export const remove = asyncHandler(async (req: Request, res: Response) => {
   await deleteRoom(req.params.roomCode!, req.auth!.sub);
   sendSuccess(res, null, 'Room deleted');
+});
+
+/** Browsable public rooms for the landing page, busiest first. */
+export const publicList = asyncHandler(async (_req: Request, res: Response) => {
+  const rooms = await listPublicRooms();
+  const mapped = rooms
+    .map((r) => r.toPublic(presence.distinctUserCount(r.roomCode)))
+    .sort((a, b) => b.participantCount - a.participantCount);
+  sendSuccess(res, { rooms: mapped }, 'OK');
 });
 
 export const mine = asyncHandler(async (req: Request, res: Response) => {
