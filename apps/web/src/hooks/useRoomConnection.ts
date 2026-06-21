@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import type { ReactionEmoji, SocketAuth } from '@watchlink/shared';
+import type { PlayerState, ReactionEmoji, SocketAuth } from '@watchlink/shared';
 import { createSocket, type AppClientSocket } from '@/lib/socket';
 import { getToken } from '@/lib/token';
 import { useRoomStore } from '@/store/room';
@@ -151,9 +151,23 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
     });
   }, [roomCode]);
 
+  const deleteRoom = useCallback(() => {
+    socketRef.current?.emit('room:delete', { roomCode }, (res) => {
+      // On success the server broadcasts 'room:closed' which drives the redirect.
+      if (!res.success) toast.error(res.message);
+    });
+  }, [roomCode]);
+
   // --- Player actions (host only — server enforces) --------------------------
   const changeMedia = useCallback((url: string) => {
     socketRef.current?.emit('media:change', { roomCode, url }, (res) => {
+      if (res.success && res.data) applyPlayer(res.data);
+      else toast.error(res.message);
+    });
+  }, [roomCode, applyPlayer]);
+
+  const clearMedia = useCallback(() => {
+    socketRef.current?.emit('media:clear', { roomCode }, (res) => {
       if (res.success && res.data) applyPlayer(res.data);
       else toast.error(res.message);
     });
@@ -179,17 +193,49 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
     });
   }, [roomCode, applyPlayer]);
 
+  const playPrevious = useCallback(() => {
+    socketRef.current?.emit('queue:previous', { roomCode }, (res) => {
+      if (res.success && res.data) applyPlayer(res.data);
+      else toast.error(res.message);
+    });
+  }, [roomCode, applyPlayer]);
+
+  /**
+   * Apply the controller's own playback change locally so THEIR player reconciles
+   * to it. The server only rebroadcasts to the OTHER viewers, and a transport-bar
+   * action (skip, play/pause, jump-to-note) is not a native player gesture — so
+   * without this the controller's own element would never move. Built from the
+   * current authoritative player with the changed fields overridden.
+   */
+  const applyOptimistic = useCallback(
+    (patch: Partial<PlayerState>) => {
+      const { room, selfId } = useRoomStore.getState();
+      const current = room?.player;
+      if (!current) return;
+      applyPlayer({
+        ...current,
+        ...patch,
+        serverTimestamp: Date.now(),
+        updatedBy: selfId ?? current.updatedBy,
+      });
+    },
+    [applyPlayer],
+  );
+
   const play = useCallback((currentTime: number) => {
     socketRef.current?.emit('player:play', { roomCode, currentTime });
-  }, [roomCode]);
+    applyOptimistic({ status: 'playing', currentTime });
+  }, [roomCode, applyOptimistic]);
 
   const pause = useCallback((currentTime: number) => {
     socketRef.current?.emit('player:pause', { roomCode, currentTime });
-  }, [roomCode]);
+    applyOptimistic({ status: 'paused', currentTime });
+  }, [roomCode, applyOptimistic]);
 
   const seek = useCallback((currentTime: number) => {
     socketRef.current?.emit('player:seek', { roomCode, currentTime });
-  }, [roomCode]);
+    applyOptimistic({ currentTime });
+  }, [roomCode, applyOptimistic]);
 
   const requestSync = useCallback(() => {
     socketRef.current?.emit('player:sync-request', { roomCode });
@@ -238,12 +284,15 @@ export function useRoomConnection({ roomCode, password, guestName, enabled }: Op
     setLocked,
     kick,
     transferHost,
+    deleteRoom,
     grantControl,
     revokeControl,
     changeMedia,
+    clearMedia,
     addToQueue,
     removeFromQueue,
     playNext,
+    playPrevious,
     play,
     pause,
     seek,

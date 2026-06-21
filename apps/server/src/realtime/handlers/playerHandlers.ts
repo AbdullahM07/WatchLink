@@ -23,6 +23,20 @@ function safeTime(value: unknown): number {
   return Math.min(n, 24 * 60 * 60); // cap at 24h
 }
 
+/** The empty "nothing playing" player state — mirrors the Room schema defaults. */
+function emptyPlayer(updatedBy: string): PlayerState {
+  return {
+    mediaUrl: null,
+    provider: 'unsupported',
+    mode: 'cinema',
+    status: 'paused',
+    currentTime: 0,
+    playbackRate: 1,
+    serverTimestamp: Date.now(),
+    updatedBy,
+  };
+}
+
 export function registerPlayerHandlers(io: AppServer, socket: AppSocket): void {
   const me = socket.data.identity;
 
@@ -64,6 +78,18 @@ export function registerPlayerHandlers(io: AppServer, socket: AppSocket): void {
       socket.to(code).emit('media:changed', state);
     } catch (err) {
       failAck(ack, err instanceof Error ? err.message : 'Could not change media');
+    }
+  });
+
+  socket.on('media:clear', async (payload: { roomCode: string }, ack: Ack<PlayerState>) => {
+    try {
+      const { code } = await asController(payload.roomCode);
+      const state = emptyPlayer(me.id);
+      persist(code, state);
+      ack?.({ success: true, message: 'Playback stopped', data: state });
+      socket.to(code).emit('media:changed', state);
+    } catch (err) {
+      failAck(ack, err instanceof Error ? err.message : 'Could not stop playback');
     }
   });
 

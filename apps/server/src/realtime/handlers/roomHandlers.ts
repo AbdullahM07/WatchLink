@@ -7,7 +7,7 @@ import type {
   PublicRoom,
 } from '@watchlink/shared';
 import { logger } from '../../config/logger';
-import { addMember, getRoomByCode, touchRoom } from '../../services/room.service';
+import { addMember, deleteRoom, getRoomByCode, touchRoom } from '../../services/room.service';
 import { getHistory } from '../../services/chat.service';
 import { listNotes } from '../../services/note.service';
 import { Room } from '../../models/Room';
@@ -155,6 +155,27 @@ export function registerRoomHandlers(io: AppServer, socket: AppSocket): void {
 
   socket.on('room:leave', async ({ roomCode }) => {
     await leaveRoom(io, socket, String(roomCode).toUpperCase());
+  });
+
+  socket.on('room:delete', async ({ roomCode }, ack) => {
+    try {
+      const code = String(roomCode).toUpperCase();
+      // Verifies the caller is the host and removes the room from the DB
+      // (throws ApiError.forbidden / notFound otherwise).
+      await deleteRoom(code, me.id);
+
+      // Tell everyone the room is gone — clients disconnect on this event.
+      io.to(code).emit('room:closed', { reason: 'The host closed this room' });
+
+      // Drop all in-memory room state so nothing lingers after deletion.
+      dropPlayer(code);
+      clearGrants(code);
+      clearQueue(code);
+
+      ok(ack, null, 'Room deleted');
+    } catch (err) {
+      fail(ack, err instanceof Error ? err.message : 'Failed to delete room');
+    }
   });
 
   socket.on('room:lock', async ({ roomCode, isLocked }, ack) => {

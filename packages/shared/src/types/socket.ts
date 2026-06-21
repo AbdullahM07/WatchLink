@@ -140,6 +140,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   'room:join': (payload: JoinRoomPayload, ack: Ack<PublicRoom>) => void;
   'room:leave': (payload: { roomCode: string }) => void;
+  'room:delete': (payload: { roomCode: string }, ack: Ack) => void;
   'room:lock': (payload: { roomCode: string; isLocked: boolean }, ack: Ack) => void;
   'room:kick': (payload: HostActionPayload, ack: Ack) => void;
   'room:host-transfer': (payload: HostActionPayload, ack: Ack) => void;
@@ -147,9 +148,13 @@ export interface ClientToServerEvents {
   'room:revoke-control': (payload: HostActionPayload, ack: Ack) => void;
 
   'media:change': (payload: MediaChangePayload, ack: Ack<PlayerState>) => void;
+  /** Clear the current media — returns the room to the empty "nothing playing" stage. */
+  'media:clear': (payload: { roomCode: string }, ack: Ack<PlayerState>) => void;
   'queue:add': (payload: QueueAddPayload, ack: Ack<QueueItem>) => void;
   'queue:remove': (payload: QueueRemovePayload, ack: Ack) => void;
   'queue:next': (payload: { roomCode: string }, ack: Ack<PlayerState>) => void;
+  /** Step back to the previously-played item, re-queueing the current one. */
+  'queue:previous': (payload: { roomCode: string }, ack: Ack<PlayerState>) => void;
   'player:play': (payload: PlayerPlayPayload) => void;
   'player:pause': (payload: PlayerPausePayload) => void;
   'player:seek': (payload: PlayerSeekPayload) => void;

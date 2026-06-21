@@ -1,17 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { Link2, ListPlus, MonitorPlay, Radio } from 'lucide-react';
+import { Link2, ListPlus, MonitorPlay, Radio, Square } from 'lucide-react';
 import { QURAN_RADIO, resolveProvider } from '@watchlink/shared';
 import { Button } from '@/components/ui/Button';
 
 interface Props {
   onChangeMedia: (url: string) => void;
   onAddToQueue: (url: string) => void;
+  /** Clear whatever is playing now (radio or video) so another can be loaded. */
+  onStop: () => void;
+  /** Whether something is currently loaded — gates the Stop control. */
+  hasMedia: boolean;
 }
 
 /** Host-only control to load the room's video now, or queue it for later. */
-export function MediaBar({ onChangeMedia, onAddToQueue }: Props) {
+export function MediaBar({ onChangeMedia, onAddToQueue, onStop, hasMedia }: Props) {
   const [url, setUrl] = useState('');
   const resolution = url.trim() ? resolveProvider(url) : null;
   const invalid = resolution?.provider === 'unsupported';
@@ -74,6 +78,17 @@ export function MediaBar({ onChangeMedia, onAddToQueue }: Props) {
             · {QURAN_RADIO.subtitle}
           </span>
         </button>
+
+        {/* Stop whatever is playing now (radio or video) — clears the stage. */}
+        {hasMedia && (
+          <button
+            type="button"
+            onClick={onStop}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface px-2.5 py-1 text-xs font-medium text-slate-300 transition-colors hover:border-red-500/50 hover:text-red-300"
+          >
+            <Square className="h-3.5 w-3.5" /> Stop
+          </button>
+        )}
       </div>
     </form>
   );

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, Link2, Lock, LogOut, Unlock } from 'lucide-react';
+import { Check, Link2, Lock, LogOut, Trash2, Unlock } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PublicRoom } from '@watchlink/shared';
 import type { RoomStatus } from '@/store/room';
@@ -14,6 +14,7 @@ interface Props {
   amHost: boolean;
   status: RoomStatus;
   onToggleLock: (locked: boolean) => void;
+  onDeleteRoom: () => void;
 }
 
 const STATUS_LABEL: Record<RoomStatus, { text: string; dot: string }> = {
@@ -27,10 +28,26 @@ const STATUS_LABEL: Record<RoomStatus, { text: string; dot: string }> = {
   closed: { text: 'Closed', dot: 'bg-red-500' },
 };
 
-export function RoomHeader({ room, amHost, status, onToggleLock }: Props) {
+export function RoomHeader({ room, amHost, status, onToggleLock, onDeleteRoom }: Props) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [deleteArmed, setDeleteArmed] = useState(false);
+  const deleteTimer = useRef<ReturnType<typeof setTimeout>>();
   const s = STATUS_LABEL[status];
+
+  useEffect(() => () => clearTimeout(deleteTimer.current), []);
+
+  // Two-click safety: first click arms (turns red), a second within 3s deletes.
+  const handleDelete = () => {
+    if (!deleteArmed) {
+      setDeleteArmed(true);
+      deleteTimer.current = setTimeout(() => setDeleteArmed(false), 3000);
+    } else {
+      clearTimeout(deleteTimer.current);
+      setDeleteArmed(false);
+      onDeleteRoom();
+    }
+  };
 
   const copyInvite = async () => {
     const url = `${window.location.origin}/room/${room.roomCode}`;
@@ -75,6 +92,22 @@ export function RoomHeader({ room, amHost, status, onToggleLock }: Props) {
           <LogOut className="h-4 w-4" />
           Leave
         </Button>
+        {amHost && (
+          <Button
+            variant={deleteArmed ? 'danger' : 'ghost'}
+            size="sm"
+            onClick={handleDelete}
+            onMouseLeave={() => {
+              clearTimeout(deleteTimer.current);
+              setDeleteArmed(false);
+            }}
+            className={cn(!deleteArmed && 'text-red-400 hover:bg-red-500/10')}
+            title={deleteArmed ? 'Click again to confirm' : 'Delete room'}
+          >
+            {deleteArmed ? <Check className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+            {deleteArmed ? 'Confirm' : 'Delete'}
+          </Button>
+        )}
       </div>
     </div>
   );

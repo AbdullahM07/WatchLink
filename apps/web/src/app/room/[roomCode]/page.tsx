@@ -125,6 +125,9 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
   if (conn.status === 'kicked') {
     return <ErrorCard title="You were removed" message={conn.error ?? 'The host removed you from the room.'} />;
   }
+  if (conn.status === 'closed') {
+    return <ErrorCard title="Room closed" message={conn.error ?? 'The host closed this room.'} />;
+  }
   if (conn.status === 'error' && !gateNeeded) {
     return <ErrorCard title="Could not join" message={conn.error ?? 'Something went wrong.'} />;
   }
@@ -161,7 +164,7 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className={cn(isPlaying && 'lights-down')}>
-        <RoomHeader room={room} amHost={amHost} status={conn.status} onToggleLock={conn.setLocked} />
+        <RoomHeader room={room} amHost={amHost} status={conn.status} onToggleLock={conn.setLocked} onDeleteRoom={conn.deleteRoom} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
@@ -178,10 +181,15 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
             onSeek={conn.seek}
             onChangeMedia={conn.changeMedia}
             onAddToQueue={conn.addToQueue}
+            onStop={conn.clearMedia}
             onRequestSync={conn.requestSync}
             onRegisterTime={registerTime}
             onReact={conn.sendReaction}
             onReactionDone={conn.removeReaction}
+            timeApi={timeApi}
+            canGoNext={conn.queue.length > 0}
+            onPlayNext={conn.playNext}
+            onPlayPrevious={conn.playPrevious}
           />
           {hasMedia && (
             <ProgressBar

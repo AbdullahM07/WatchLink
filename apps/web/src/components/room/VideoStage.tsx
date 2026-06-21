@@ -1,14 +1,16 @@
 'use client';
 
+import { useCallback } from 'react';
 import { MonitorPlay, Video, AudioLines } from 'lucide-react';
 import { resolveProvider, type Participant, type PublicRoom, type ReactionEmoji } from '@watchlink/shared';
 import { CinemaPlayer } from './players/CinemaPlayer';
+import { PlayerControls } from './players/PlayerControls';
 import { MediaBar } from './MediaBar';
 import { ReactionLayer } from './ReactionLayer';
 import { StagePresence } from './StagePresence';
 import { cn } from '@/lib/cn';
 import { usePlaybackPrefs } from '@/store/playbackPrefs';
-import type { RegisterTimeApi } from '@/lib/players/timeApi';
+import type { PlayerTimeApi, RegisterTimeApi } from '@/lib/players/timeApi';
 import type { FloatingReaction } from '@/store/room';
 
 interface Props {
@@ -23,10 +25,17 @@ interface Props {
   onSeek: (t: number) => void;
   onChangeMedia: (url: string) => void;
   onAddToQueue: (url: string) => void;
+  onStop: () => void;
   onRequestSync: () => void;
   onRegisterTime: RegisterTimeApi;
   onReact: (emoji: ReactionEmoji) => void;
   onReactionDone: (id: string) => void;
+  /** Live time accessor for the transport bar (read skip/play position). */
+  timeApi: PlayerTimeApi | null;
+  /** Whether an item is queued up next (enables ⏭ in the transport bar). */
+  canGoNext: boolean;
+  onPlayNext: () => void;
+  onPlayPrevious: () => void;
 }
 
 export function VideoStage({
@@ -41,12 +50,24 @@ export function VideoStage({
   onSeek,
   onChangeMedia,
   onAddToQueue,
+  onStop,
   onRequestSync,
   onRegisterTime,
   onReact,
   onReactionDone,
+  timeApi,
+  canGoNext,
+  onPlayNext,
+  onPlayPrevious,
 }: Props) {
   const hasMedia = Boolean(room.player.mediaUrl);
+
+  // When the current item ends, auto-advance to the next queued item, or clear
+  // the stage if the queue is empty. Only the controller's player fires this.
+  const handleEnded = useCallback(() => {
+    if (canGoNext) onPlayNext();
+    else onStop();
+  }, [canGoNext, onPlayNext, onStop]);
 
   // Per-user (local) audio preference — never synced. The source itself can also
   // be audio-native (radio / podcast), which forces the audio presentation.
@@ -76,6 +97,8 @@ export function VideoStage({
             onSeek={onSeek}
             onReady={onRequestSync}
             onRegisterTime={onRegisterTime}
+            onStop={canControl ? onStop : undefined}
+            onEnded={canControl ? handleEnded : undefined}
           />
         ) : (
           <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-surface-border bg-gradient-to-br from-surface-overlay to-black">
@@ -99,7 +122,29 @@ export function VideoStage({
         <ReactionLayer reactions={reactions} onReact={onReact} onDone={onReactionDone} />
       </div>
 
-      {canControl && <MediaBar onChangeMedia={onChangeMedia} onAddToQueue={onAddToQueue} />}
+      {/* Synced transport — video mode only (audio mode carries its own in the overlay). */}
+      {canControl && hasMedia && !audioUi && (
+        <PlayerControls
+          status={room.player.status}
+          timeApi={timeApi}
+          canGoNext={canGoNext}
+          onPlay={onPlay}
+          onPause={onPause}
+          onSeek={onSeek}
+          onPrevious={onPlayPrevious}
+          onNext={onPlayNext}
+          onStop={onStop}
+        />
+      )}
+
+      {canControl && (
+        <MediaBar
+          onChangeMedia={onChangeMedia}
+          onAddToQueue={onAddToQueue}
+          onStop={onStop}
+          hasMedia={hasMedia}
+        />
+      )}
 
       {!canControl && hasMedia && (
         <p className="text-center text-xs text-slate-400">
@@ -126,7 +171,9 @@ function ViewToggle({
   const base =
     'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-default';
   return (
-    <div className="flex justify-end">
+    <div className="flex items-center justify-end gap-2">
+      {/* Per-user choice — each viewer picks how they consume this source. */}
+      <span className="text-xs text-slate-500">Your view</span>
       <div
         role="group"
         aria-label="Playback view"

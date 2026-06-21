@@ -5,6 +5,7 @@ import type { PlayerState } from '@watchlink/shared';
 import { loadYouTubeApi, type YTPlayer } from '@/lib/players/youtube';
 import { reconcile } from '@/lib/players/reconcile';
 import type { RegisterTimeApi } from '@/lib/players/timeApi';
+import type { RegisterLocalPlayback } from '@/lib/players/localPlayback';
 
 interface Props {
   embedId: string;
@@ -16,6 +17,12 @@ interface Props {
   onSeek: (t: number) => void;
   onReady: () => void;
   onRegisterTime: RegisterTimeApi;
+  /** Expose direct player control to the audio overlay (optional). */
+  onRegisterLocal?: RegisterLocalPlayback;
+  /** Report whether the player is actually playing locally (optional). */
+  onLocalPlayingChange?: (playing: boolean) => void;
+  /** Fired (controllers only) when the video ends, to drive auto-advance. */
+  onEnded?: () => void;
 }
 
 /** YouTube IFrame Player API wrapper with full play/pause/seek sync. */
@@ -29,6 +36,9 @@ export function YouTubePlayer({
   onSeek,
   onReady,
   onRegisterTime,
+  onRegisterLocal,
+  onLocalPlayingChange,
+  onEnded,
 }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const ytRef = useRef<YTPlayer | null>(null);
@@ -36,8 +46,12 @@ export function YouTubePlayer({
   const suppressUntil = useRef(0);
 
   // Keep latest callbacks/flags without re-creating the player.
-  const cb = useRef({ onPlay, onPause, onSeek, onReady, onRegisterTime, canControl });
-  cb.current = { onPlay, onPause, onSeek, onReady, onRegisterTime, canControl };
+  const cb = useRef({
+    onPlay, onPause, onSeek, onReady, onRegisterTime, onRegisterLocal, onLocalPlayingChange, onEnded, canControl,
+  });
+  cb.current = {
+    onPlay, onPause, onSeek, onReady, onRegisterTime, onRegisterLocal, onLocalPlayingChange, onEnded, canControl,
+  };
 
   // Create the player once per video id.
   useEffect(() => {
@@ -64,9 +78,24 @@ export function YouTubePlayer({
               getCurrentTime: () => e.target.getCurrentTime(),
               getDuration: () => e.target.getDuration(),
             });
+            cb.current.onRegisterLocal?.({
+              play: () => e.target.playVideo(),
+              pause: () => e.target.pauseVideo(),
+              setMuted: (m) => (m ? e.target.mute() : e.target.unMute()),
+              setVolume: (vol) => e.target.setVolume(Math.round(vol * 100)),
+            });
             cb.current.onReady();
           },
           onStateChange: (e) => {
+            // Report local playback state regardless of control so the audio
+            // overlay can reflect it (and prompt to tap when autoplay is blocked).
+            if (e.data === YT.PlayerState.PLAYING) cb.current.onLocalPlayingChange?.(true);
+            else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+              cb.current.onLocalPlayingChange?.(false);
+            }
+            // Auto-advance is the controller's job — fire regardless of suppression
+            // (the end of a clip is a genuine terminal state, not an echo).
+            if (e.data === YT.PlayerState.ENDED && cb.current.canControl) cb.current.onEnded?.();
             if (!cb.current.canControl || suppressed()) return;
             const t = e.target.getCurrentTime();
             if (e.data === YT.PlayerState.PLAYING) cb.current.onPlay(t);
@@ -96,6 +125,8 @@ export function YouTubePlayer({
       cancelled = true;
       if (poll) clearInterval(poll);
       cb.current.onRegisterTime(null);
+      cb.current.onRegisterLocal?.(null);
+      cb.current.onLocalPlayingChange?.(false);
       try {
         ytRef.current?.destroy();
       } catch {

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PlayerState } from '@watchlink/shared';
 import { reconcile } from '@/lib/players/reconcile';
 import type { RegisterTimeApi } from '@/lib/players/timeApi';
+import type { RegisterLocalPlayback } from '@/lib/players/localPlayback';
 
 interface Props {
   player: PlayerState;
@@ -14,6 +15,12 @@ interface Props {
   onSeek: (t: number) => void;
   onReady: () => void;
   onRegisterTime: RegisterTimeApi;
+  /** Expose direct element control to the audio overlay (optional). */
+  onRegisterLocal?: RegisterLocalPlayback;
+  /** Report whether the element is actually playing locally (optional). */
+  onLocalPlayingChange?: (playing: boolean) => void;
+  /** Fired (controllers only) when the media reaches its end, to drive auto-advance. */
+  onEnded?: () => void;
 }
 
 /** HTML5 <video> player for direct .mp4/.webm URLs with full playback sync. */
@@ -26,6 +33,9 @@ export function DirectPlayer({
   onSeek,
   onReady,
   onRegisterTime,
+  onRegisterLocal,
+  onLocalPlayingChange,
+  onEnded,
 }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
@@ -80,15 +90,18 @@ export function DirectPlayer({
     const handlePlay = () => !suppressed() && onPlay(v.currentTime);
     const handlePause = () => !suppressed() && onPause(v.currentTime);
     const handleSeeked = () => !suppressed() && onSeek(v.currentTime);
+    const handleEnded = () => onEnded?.();
     v.addEventListener('play', handlePlay);
     v.addEventListener('pause', handlePause);
     v.addEventListener('seeked', handleSeeked);
+    v.addEventListener('ended', handleEnded);
     return () => {
       v.removeEventListener('play', handlePlay);
       v.removeEventListener('pause', handlePause);
       v.removeEventListener('seeked', handleSeeked);
+      v.removeEventListener('ended', handleEnded);
     };
-  }, [canControl, onPlay, onPause, onSeek]);
+  }, [canControl, onPlay, onPause, onSeek, onEnded]);
 
   // Expose a precise time accessor + signal ready once metadata loads.
   useEffect(() => {
@@ -105,6 +118,36 @@ export function DirectPlayer({
       onRegisterTime(null);
     };
   }, [onReady, onRegisterTime]);
+
+  // Expose direct element control to the audio overlay, and report whether the
+  // element is *actually* playing (regardless of control) so the overlay can show
+  // the right state and a "tap to listen" prompt when autoplay was blocked.
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    onRegisterLocal?.({
+      play: () => v.play(),
+      pause: () => v.pause(),
+      setMuted: (m) => {
+        v.muted = m;
+      },
+      setVolume: (vol) => {
+        v.volume = vol;
+      },
+    });
+    const report = () => onLocalPlayingChange?.(!v.paused);
+    v.addEventListener('play', report);
+    v.addEventListener('pause', report);
+    v.addEventListener('ended', report);
+    report();
+    return () => {
+      v.removeEventListener('play', report);
+      v.removeEventListener('pause', report);
+      v.removeEventListener('ended', report);
+      onRegisterLocal?.(null);
+      onLocalPlayingChange?.(false);
+    };
+  }, [onRegisterLocal, onLocalPlayingChange]);
 
   // Reconcile to the authoritative state on every update (loops avoided via suppression).
   useEffect(() => {
@@ -126,6 +169,10 @@ export function DirectPlayer({
           v.pause();
         },
         seekTo: (t) => {
+          // Live/continuous streams (radio, live HLS) report a non-finite duration
+          // and can't be seeked to an arbitrary position — forcing it fights the
+          // stream and can drop the audio. For those, only play/pause matters.
+          if (!Number.isFinite(v.duration)) return;
           guard();
           v.currentTime = t;
         },

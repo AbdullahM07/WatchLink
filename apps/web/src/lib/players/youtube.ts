@@ -11,6 +11,11 @@ export interface YTPlayer {
   getCurrentTime(): number;
   getDuration(): number;
   getPlayerState(): number;
+  mute(): void;
+  unMute(): void;
+  isMuted(): boolean;
+  /** Volume on YouTube's 0–100 scale. */
+  setVolume(volume: number): void;
   destroy(): void;
 }
 
