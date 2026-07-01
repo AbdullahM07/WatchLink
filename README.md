@@ -68,19 +68,26 @@ Then open http://localhost:3000.
 ## Status / roadmap
 
 - [x] **Phase 1** — Monorepo, TypeScript, MongoDB, JWT authentication (register / login / me / profile)
-- [ ] Phase 2 — Rooms, Socket.IO, participants, chat
-- [ ] Phase 3 — YouTube + direct video providers, playback sync
-- [ ] Phase 4 — WebRTC push-to-talk voice
-- [ ] Phase 5 — Reactions, social providers, UI polish
-- [ ] Phase 6 — Admin, security hardening, tests, deployment
+- [x] **Phase 2** — Rooms, Socket.IO, participants/presence, host controls, chat
+- [x] **Phase 3** — YouTube, direct/HLS, Facebook + other social providers, playback sync, queue
+- [x] **Phase 4** — WebRTC push-to-talk voice
+- [x] **Phase 5** — Reactions, timestamped notes, UI polish
+- [ ] Phase 6 — Admin, broader test coverage, deployment
 
-## Phase 1 — what works now
+## What works now
 
-- Register a new account, log in, and stay logged in across refreshes.
-- View and edit your profile (display name + avatar URL).
-- Protected routes redirect guests to login.
+- Register a new account, log in, and stay logged in across refreshes; guests can join rooms without an account.
+- View and edit your profile (display name + avatar URL). Protected routes redirect guests to login.
+- Create/lock/password-protect a room, join by code, and see live presence with host reassignment.
+- Playback stays in sync across everyone in a room (YouTube, direct/HLS, and social embeds where the
+  provider allows it), with a host-managed queue (add / remove / next / previous).
+- Live chat, timestamped notes, and floating emoji reactions — all rate-limited per socket.
+- WebRTC push-to-talk voice: peer-to-peer audio with the server acting as a signaling relay only
+  (never inspects SDP/ICE payloads), scoped so only actual voice-mesh members can signal or be signaled.
 - Hardened API: Helmet, CORS allow-list, rate limiting, Zod validation, bcrypt hashing,
   JWT auth, and `passwordHash` is never returned.
+- Automated tests: player sync reconciliation (`apps/web`), rate limiter and voice-mesh signaling
+  (`apps/server`) — run with `npm test`.
 
 ### Try the API directly
 

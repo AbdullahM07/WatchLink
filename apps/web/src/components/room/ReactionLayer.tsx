@@ -45,7 +45,7 @@ export function ReactionLayer({ reactions, onReact, onDone }: Props) {
               onClick={() => onReact(emoji)}
               aria-label={`React ${emoji}`}
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-full text-xl transition-transform duration-150',
+                'flex h-11 w-11 items-center justify-center rounded-full text-xl transition-transform duration-150',
                 'hover:scale-[1.35] hover:bg-accent-500/15 active:scale-95',
               )}
             >

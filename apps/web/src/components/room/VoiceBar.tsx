@@ -45,7 +45,7 @@ export function VoiceBar({ voice }: Props) {
           disabled={muted}
           aria-pressed={talking}
           className={cn(
-            'flex flex-1 select-none items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition',
+            'flex min-h-11 flex-1 select-none items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition',
             'focus-visible:outline-none',
             muted
               ? 'cursor-not-allowed bg-surface-overlay text-slate-400'

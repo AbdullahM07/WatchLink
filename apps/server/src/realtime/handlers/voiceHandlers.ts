@@ -29,6 +29,8 @@ export function registerVoiceHandlers(io: AppServer, socket: AppSocket): void {
   ) => {
     const roomCode = String(payload?.roomCode ?? '').toUpperCase();
     if (!socket.rooms.has(roomCode)) return;
+    // Only actual voice-mesh members may signal — being in the room isn't enough.
+    if (!voiceStore.hasUser(roomCode, me.id)) return;
     const targets = voiceStore.socketIdsForUser(roomCode, String(payload?.to ?? ''));
     for (const sid of targets) {
       io.to(sid).emit(event, { from: me.id, data: payload.data });
@@ -66,14 +68,14 @@ export function registerVoiceHandlers(io: AppServer, socket: AppSocket): void {
 
   socket.on('voice:speaking', ({ roomCode, speaking }: VoiceSpeakingPayload) => {
     const code = String(roomCode ?? '').toUpperCase();
-    if (!socket.rooms.has(code)) return;
+    if (!socket.rooms.has(code) || !voiceStore.hasUser(code, me.id)) return;
     presence.update(socket.id, { isSpeaking: Boolean(speaking) });
     io.to(code).emit('voice:speaking', { userId: me.id, speaking: Boolean(speaking) });
   });
 
   socket.on('voice:mute-state', ({ roomCode, muted }: VoiceMuteStatePayload) => {
     const code = String(roomCode ?? '').toUpperCase();
-    if (!socket.rooms.has(code)) return;
+    if (!socket.rooms.has(code) || !voiceStore.hasUser(code, me.id)) return;
     presence.update(socket.id, { isMuted: Boolean(muted) });
     io.to(code).emit('voice:mute-state', { userId: me.id, muted: Boolean(muted) });
   });
