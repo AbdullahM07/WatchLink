@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, MessageSquare, Users as UsersIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PublicRoom } from '@watchlink/shared';
 import { Button } from '@/components/ui/Button';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { RoomHeader } from '@/components/room/RoomHeader';
+import { ConnectionBanner } from '@/components/room/ConnectionBanner';
 import { VideoStage } from '@/components/room/VideoStage';
 import { ProgressBar } from '@/components/room/ProgressBar';
 import { QueuePanel } from '@/components/room/QueuePanel';
@@ -69,6 +70,9 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [creds, setCreds] = useState<{ guestName?: string; password?: string }>({});
   const [enabled, setEnabled] = useState(false);
+  // Mobile-only view switch: the chat and the room panels (queue + people) can't
+  // both fit a phone alongside the video, so we tab between them. Ignored at lg+.
+  const [mobileTab, setMobileTab] = useState<'chat' | 'room'>('chat');
 
   // Live player time accessor — registered by the active player so the UI can
   // read the EXACT current position when pinning a note (no throttled state lag).
@@ -163,12 +167,14 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
 
   return (
     <div className="space-y-4 animate-fade-in">
+      <ConnectionBanner status={conn.status} />
       <div className={cn(isPlaying && 'lights-down')}>
         <RoomHeader room={room} amHost={amHost} status={conn.status} onToggleLock={conn.setLocked} onDeleteRoom={conn.deleteRoom} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-4">
+        {/* Video + progress — always on top; left column on desktop. */}
+        <div className="space-y-4 lg:col-start-1 lg:row-start-1">
           <VideoStage
             room={room}
             canControl={canControl}
@@ -200,29 +206,74 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
               onJump={conn.seek}
             />
           )}
-          <div className={cn('space-y-4', isPlaying && 'lights-down')}>
-            <QueuePanel
-              queue={conn.queue}
-              canControl={canControl}
-              onPlayNext={conn.playNext}
-              onRemove={conn.removeFromQueue}
+        </div>
+
+        {/* Mobile-only tab switch between chat and the room panels. */}
+        <div className="flex gap-1 rounded-xl border border-surface-border bg-surface-raised/60 p-1 lg:hidden" role="tablist">
+          <button
+            role="tab"
+            aria-selected={mobileTab === 'chat'}
+            onClick={() => setMobileTab('chat')}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors',
+              mobileTab === 'chat' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-surface-overlay',
+            )}
+          >
+            <MessageSquare className="h-4 w-4" /> Chat
+            {conn.messages.length > 0 && (
+              <span className="rounded-full bg-black/20 px-1.5 text-[10px]">{conn.messages.length}</span>
+            )}
+          </button>
+          <button
+            role="tab"
+            aria-selected={mobileTab === 'room'}
+            onClick={() => setMobileTab('room')}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors',
+              mobileTab === 'room' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-surface-overlay',
+            )}
+          >
+            <UsersIcon className="h-4 w-4" /> Room
+            <span className="rounded-full bg-black/20 px-1.5 text-[10px]">{conn.participants.length}</span>
+          </button>
+        </div>
+
+        {/* Queue + participants — desktop: under the video; mobile: only on the "Room" tab. */}
+        <div
+          className={cn(
+            'space-y-4 lg:col-start-1 lg:row-start-2',
+            isPlaying && 'lights-down',
+            mobileTab === 'chat' && 'hidden lg:block',
+          )}
+        >
+          <QueuePanel
+            queue={conn.queue}
+            canControl={canControl}
+            onPlayNext={conn.playNext}
+            onRemove={conn.removeFromQueue}
+          />
+          <div className="rounded-2xl border border-surface-border bg-surface-raised/60 p-3">
+            <ParticipantList
+              participants={conn.participants}
+              selfId={conn.selfId}
+              hostId={room.hostId}
+              amHost={amHost}
+              onKick={conn.kick}
+              onTransfer={conn.transferHost}
+              onGrantControl={conn.grantControl}
+              onRevokeControl={conn.revokeControl}
             />
-            <div className="rounded-2xl border border-surface-border bg-surface-raised/60 p-3">
-              <ParticipantList
-                participants={conn.participants}
-                selfId={conn.selfId}
-                hostId={room.hostId}
-                amHost={amHost}
-                onKick={conn.kick}
-                onTransfer={conn.transferHost}
-                onGrantControl={conn.grantControl}
-                onRevokeControl={conn.revokeControl}
-              />
-            </div>
           </div>
         </div>
 
-        <div className="h-[75vh] overflow-hidden rounded-2xl border border-surface-border bg-surface-raised/60 lg:h-[calc(100vh-9rem)]">
+        {/* Chat / notes — desktop: right column, full height; mobile: only on the "Chat" tab. */}
+        <div
+          className={cn(
+            'h-[70vh] overflow-hidden rounded-2xl border border-surface-border bg-surface-raised/60',
+            'lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:h-[calc(100vh-9rem)]',
+            mobileTab === 'room' && 'hidden lg:block',
+          )}
+        >
           <SidePanel
             messages={conn.messages}
             notes={conn.notes}

@@ -77,7 +77,7 @@ export function RoomHeader({ room, amHost, status, onToggleLock, onDeleteRoom }:
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button variant="secondary" size="sm" onClick={copyInvite}>
           {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
           Invite

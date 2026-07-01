@@ -1,9 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { MessageSquare, Mic, MonitorPlay, Play, Smile, Users } from 'lucide-react';
+import {
+  DoorOpen,
+  Link2,
+  MessageSquare,
+  Mic,
+  MonitorPlay,
+  Play,
+  Smile,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { PublicRooms } from '@/components/landing/PublicRooms';
+import { useReveal } from '@/hooks/useReveal';
 import { useAuthStore } from '@/store/auth';
 import { cn } from '@/lib/cn';
 
@@ -66,32 +77,68 @@ export default function LandingPage() {
             desc="YouTube, direct video and live streams stay in lockstep for the whole room. The host hits play; everyone plays."
             tone="brand"
             large
+            delay={0}
           />
           <FeatureTile
             icon={Smile}
             title="Reactions that land"
             desc="Float ❤️ 😂 🔥 over the video and feel the room react in the moment."
             tone="accent"
+            delay={80}
           />
           <FeatureTile
             icon={Mic}
             title="Push-to-talk"
             desc="Hold a key and talk live. Your mic stays off until you press."
             tone="plain"
+            delay={160}
           />
           <FeatureTile
             icon={MessageSquare}
             title="Live chat & notes"
             desc="Real-time messaging with history, plus notes pinned to the exact timestamp."
             tone="plain"
+            delay={240}
           />
           <FeatureTile
             icon={Users}
             title="Your room, your rules"
             desc="Public or private, with host controls — lock, transfer, grant control or remove."
             tone="plain"
+            delay={320}
           />
         </div>
+      </section>
+
+      {/* How it works — three steps, from zero to watching together. */}
+      <section className="mx-auto w-full max-w-6xl">
+        <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+          From link to <span className="text-brand-300">movie night</span> in seconds.
+        </h2>
+
+        <ol className="mt-8 grid gap-4 sm:grid-cols-3">
+          <HowStep
+            step={1}
+            icon={DoorOpen}
+            title="Start or join"
+            desc="Open a room in one tap, or drop in with a 6-character code from a friend."
+            delay={0}
+          />
+          <HowStep
+            step={2}
+            icon={Link2}
+            title="Paste a video"
+            desc="Add a YouTube or direct video link. The host drives playback for the whole room."
+            delay={100}
+          />
+          <HowStep
+            step={3}
+            icon={Sparkles}
+            title="Watch together"
+            desc="Everyone stays in sync while you chat, float reactions and talk push-to-talk."
+            delay={200}
+          />
+        </ol>
       </section>
 
       <p className="mx-auto max-w-prose text-center text-sm text-slate-400">
@@ -115,6 +162,7 @@ function FeatureTile({
   tone,
   className,
   large,
+  delay = 0,
 }: {
   icon: typeof MonitorPlay;
   title: string;
@@ -122,12 +170,18 @@ function FeatureTile({
   tone: 'brand' | 'accent' | 'plain';
   className?: string;
   large?: boolean;
+  delay?: number;
 }) {
   const t = TONE[tone];
+  const { ref, shown } = useReveal<HTMLDivElement>();
   return (
     <div
+      ref={ref}
+      style={{ transitionDelay: shown ? `${delay}ms` : '0ms' }}
       className={cn(
-        'flex flex-col rounded-2xl border border-surface-border bg-surface-raised/50 p-6 transition-colors',
+        'flex flex-col rounded-2xl border border-surface-border bg-surface-raised/50 p-6',
+        'transition duration-500 ease-out',
+        shown ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
         t.ring,
         className,
       )}
@@ -138,6 +192,42 @@ function FeatureTile({
       <h3 className={cn('font-semibold', large ? 'text-xl' : 'text-lg')}>{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-slate-400">{desc}</p>
     </div>
+  );
+}
+
+function HowStep({
+  step,
+  icon: Icon,
+  title,
+  desc,
+  delay = 0,
+}: {
+  step: number;
+  icon: typeof MonitorPlay;
+  title: string;
+  desc: string;
+  delay?: number;
+}) {
+  const { ref, shown } = useReveal<HTMLLIElement>();
+  return (
+    <li
+      ref={ref}
+      style={{ transitionDelay: shown ? `${delay}ms` : '0ms' }}
+      className={cn(
+        'relative flex flex-col rounded-2xl border border-surface-border bg-surface-raised/50 p-6',
+        'transition duration-500 ease-out',
+        shown ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
+      )}
+    >
+      <div className="mb-4 flex items-center gap-3">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-500/15 font-display text-sm font-semibold text-brand-200">
+          {step}
+        </span>
+        <Icon className="h-5 w-5 text-slate-400" aria-hidden />
+      </div>
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-slate-400">{desc}</p>
+    </li>
   );
 }
 

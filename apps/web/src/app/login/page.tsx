@@ -56,6 +56,7 @@ export default function LoginPage() {
         <Input
           label="Password"
           type="password"
+          revealToggle
           autoComplete="current-password"
           icon={<Lock className="h-4 w-4" />}
           error={errors.password?.message}

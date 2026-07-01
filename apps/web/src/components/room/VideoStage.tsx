@@ -6,7 +6,7 @@ import { resolveProvider, type Participant, type PublicRoom, type ReactionEmoji 
 import { CinemaPlayer } from './players/CinemaPlayer';
 import { PlayerControls } from './players/PlayerControls';
 import { MediaBar } from './MediaBar';
-import { ReactionLayer } from './ReactionLayer';
+import { ReactionLayer, ReactionBar } from './ReactionLayer';
 import { StagePresence } from './StagePresence';
 import { cn } from '@/lib/cn';
 import { usePlaybackPrefs } from '@/store/playbackPrefs';
@@ -119,8 +119,13 @@ export function VideoStage({
 
         <StagePresence participants={participants} selfId={selfId} />
 
-        <ReactionLayer reactions={reactions} onReact={onReact} onDone={onReactionDone} />
+        {/* Emojis float up over the video; the tap bar sits below the frame. */}
+        <ReactionLayer reactions={reactions} onDone={onReactionDone} />
       </div>
+
+      {/* Reaction tap bar — its own row below the video so it never crowds the
+          frame. Only shown once something's playing. */}
+      {hasMedia && <ReactionBar onReact={onReact} />}
 
       {/* Synced transport — video mode only (audio mode carries its own in the overlay). */}
       {canControl && hasMedia && !audioUi && (
