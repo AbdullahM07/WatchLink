@@ -4,6 +4,15 @@ import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode }
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
+/**
+ * Shared field styling. Used by `<Input>` and by the bare `<input>`s that sit
+ * in a flex row beside a button (chat/notes composers, media bar) where the
+ * full labelled `<Input>` wrapper doesn't fit. Add width + height per use
+ * (`w-full`/`flex-1`, `h-10`, `h-11`, …).
+ */
+export const fieldClasses =
+  'rounded-xl border border-surface-border bg-surface text-slate-100 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/60';
+
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
@@ -45,7 +54,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/60',
               icon && 'pl-10',
               hasToggle && 'pr-11',
-              error ? 'border-red-500/70' : 'border-surface-border',
+              error ? 'border-danger-500/70' : 'border-surface-border',
               className,
             )}
             {...props}
@@ -63,7 +72,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p id={errorId} className="mt-1.5 text-sm text-red-400">
+          <p id={errorId} className="mt-1.5 text-sm text-danger-400">
             {error}
           </p>
         )}

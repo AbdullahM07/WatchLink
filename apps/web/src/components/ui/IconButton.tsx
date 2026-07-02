@@ -17,7 +17,7 @@ const variants: Record<Variant, string> = {
   default: 'border border-surface-border text-slate-300 hover:bg-surface-overlay hover:text-slate-100',
   accent: 'border border-accent-500/40 bg-accent-500/15 text-accent-200 hover:bg-accent-500/25',
   brand: 'bg-brand-600 text-white hover:bg-brand-500',
-  danger: 'border border-surface-border text-slate-300 hover:bg-red-600/20 hover:text-red-300',
+  danger: 'border border-surface-border text-slate-300 hover:bg-danger-600/20 hover:text-danger-300',
 };
 
 const sizes: Record<Size, string> = {
@@ -31,8 +31,9 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     <button
       ref={ref}
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-xl transition-colors',
-        'focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex shrink-0 items-center justify-center rounded-xl transition',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+        'active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50',
         variants[variant],
         sizes[size],
         className,

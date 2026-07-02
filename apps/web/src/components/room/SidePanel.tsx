@@ -5,7 +5,7 @@ import { MessageSquare, StickyNote } from 'lucide-react';
 import type { ChatMessage, RoomNote } from '@watchlink/shared';
 import { Chat } from './Chat';
 import { NotesPanel } from './NotesPanel';
-import { cn } from '@/lib/cn';
+import { TabButton } from '@/components/ui/TabButton';
 import type { VoiceApi } from '@/hooks/useVoiceChat';
 
 interface Props {
@@ -29,31 +29,25 @@ type Tab = 'chat' | 'notes';
 export function SidePanel(props: Props) {
   const [tab, setTab] = useState<Tab>('chat');
 
-  const tabBtn = (key: Tab, label: string, Icon: typeof MessageSquare, count: number) => (
-    <button
-      onClick={() => setTab(key)}
-      className={cn(
-        'flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3 text-sm font-medium transition-colors',
-        tab === key
-          ? 'border-brand-500 text-white'
-          : 'border-transparent text-slate-400 hover:text-slate-200',
-      )}
-      role="tab"
-      aria-selected={tab === key}
-    >
-      <Icon className="h-4 w-4" />
-      {label}
-      {count > 0 && (
-        <span className="rounded-full bg-surface-border px-1.5 text-[10px] text-slate-300">{count}</span>
-      )}
-    </button>
-  );
-
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 border-b border-surface-border" role="tablist">
-        {tabBtn('chat', 'Chat', MessageSquare, props.messages.length)}
-        {tabBtn('notes', 'Notes', StickyNote, props.notes.length)}
+        <TabButton
+          active={tab === 'chat'}
+          icon={MessageSquare}
+          count={props.messages.length}
+          onClick={() => setTab('chat')}
+        >
+          Chat
+        </TabButton>
+        <TabButton
+          active={tab === 'notes'}
+          icon={StickyNote}
+          count={props.notes.length}
+          onClick={() => setTab('notes')}
+        >
+          Notes
+        </TabButton>
       </div>
 
       <div className="min-h-0 flex-1">

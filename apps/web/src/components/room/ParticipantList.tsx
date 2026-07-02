@@ -74,7 +74,7 @@ export function ParticipantList({
                 <div className="relative">
                   <button
                     onClick={() => setOpenFor((v) => (v === p.userId ? null : p.userId))}
-                    className="rounded-lg p-1 text-slate-400 opacity-0 transition hover:bg-surface-border group-hover:opacity-100"
+                    className="rounded-lg p-2 text-slate-400 opacity-0 transition hover:bg-surface-border focus-visible:opacity-100 group-hover:opacity-100"
                     aria-label={`Manage ${p.name}`}
                   >
                     <MoreVertical className="h-4 w-4" />
@@ -119,7 +119,7 @@ export function ParticipantList({
                           onKick(p.userId);
                           setOpenFor(null);
                         }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-400 hover:bg-surface-border"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger-400 hover:bg-surface-border"
                       >
                         <UserMinus className="h-4 w-4" /> Remove
                       </button>

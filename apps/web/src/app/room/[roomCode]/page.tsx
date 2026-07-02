@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, MessageSquare, Users as UsersIcon } from 'lucide-react';
+import { MessageSquare, Users as UsersIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import type { PublicRoom } from '@watchlink/shared';
 import { Button } from '@/components/ui/Button';
+import { ErrorPage } from '@/components/ui/ErrorPage';
 import { PageSpinner } from '@/components/ui/Spinner';
+import { TabButton } from '@/components/ui/TabButton';
 import { RoomHeader } from '@/components/room/RoomHeader';
 import { ConnectionBanner } from '@/components/room/ConnectionBanner';
 import { VideoStage } from '@/components/room/VideoStage';
@@ -49,14 +51,15 @@ function RemoteAudioPlayer({ stream }: { stream: MediaStream }) {
 
 function ErrorCard({ title, message }: { title: string; message: string }) {
   return (
-    <div className="mx-auto max-w-md py-16 text-center animate-fade-in">
-      <AlertTriangle className="mx-auto h-12 w-12 text-amber-400" />
-      <h1 className="mt-4 text-xl font-semibold">{title}</h1>
-      <p className="mt-2 text-slate-400">{message}</p>
-      <Link href="/dashboard" className="mt-6 inline-block">
-        <Button variant="secondary">Back to dashboard</Button>
-      </Link>
-    </div>
+    <ErrorPage
+      title={title}
+      message={message}
+      actions={
+        <Link href="/dashboard">
+          <Button variant="secondary">Back to dashboard</Button>
+        </Link>
+      }
+    />
   );
 }
 
@@ -210,32 +213,24 @@ export default function RoomPage({ params }: { params: { roomCode: string } }) {
 
         {/* Mobile-only tab switch between chat and the room panels. */}
         <div className="flex gap-1 rounded-xl border border-surface-border bg-surface-raised/60 p-1 lg:hidden" role="tablist">
-          <button
-            role="tab"
-            aria-selected={mobileTab === 'chat'}
+          <TabButton
+            variant="pill"
+            active={mobileTab === 'chat'}
+            icon={MessageSquare}
+            count={conn.messages.length}
             onClick={() => setMobileTab('chat')}
-            className={cn(
-              'flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors',
-              mobileTab === 'chat' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-surface-overlay',
-            )}
           >
-            <MessageSquare className="h-4 w-4" /> Chat
-            {conn.messages.length > 0 && (
-              <span className="rounded-full bg-black/20 px-1.5 text-[10px]">{conn.messages.length}</span>
-            )}
-          </button>
-          <button
-            role="tab"
-            aria-selected={mobileTab === 'room'}
+            Chat
+          </TabButton>
+          <TabButton
+            variant="pill"
+            active={mobileTab === 'room'}
+            icon={UsersIcon}
+            count={conn.participants.length}
             onClick={() => setMobileTab('room')}
-            className={cn(
-              'flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors',
-              mobileTab === 'room' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-surface-overlay',
-            )}
           >
-            <UsersIcon className="h-4 w-4" /> Room
-            <span className="rounded-full bg-black/20 px-1.5 text-[10px]">{conn.participants.length}</span>
-          </button>
+            Room
+          </TabButton>
         </div>
 
         {/* Queue + participants — desktop: under the video; mobile: only on the "Room" tab. */}

@@ -13,9 +13,11 @@ body {
 
 body {
   @apply bg-surface font-sans text-slate-100 antialiased;
-  /* Warm "theater" ambiance: an orchid glow up top, house-light amber below. */
-  background-image: radial-gradient(55rem 55rem at 78% -12%, rgba(184, 90, 236, 0.16), transparent 60%),
-    radial-gradient(48rem 48rem at -8% 108%, rgba(245, 158, 11, 0.08), transparent 55%);
+  /* Warm "theater" ambiance: an orchid glow up top, house-light amber below,
+     plus a soft warm wash mid-page so the space never reads as flat black. */
+  background-image: radial-gradient(60rem 60rem at 82% -10%, rgba(184, 90, 236, 0.26), transparent 62%),
+    radial-gradient(52rem 52rem at -10% 112%, rgba(245, 158, 11, 0.14), transparent 58%),
+    radial-gradient(70rem 40rem at 50% 42%, rgba(184, 90, 236, 0.06), transparent 70%);
   background-attachment: fixed;
 }
 

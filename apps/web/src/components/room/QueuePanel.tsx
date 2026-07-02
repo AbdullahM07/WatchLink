@@ -63,7 +63,7 @@ export function QueuePanel({ queue, canControl, onPlayNext, onRemove }: Props) {
                 type="button"
                 onClick={() => onRemove(item.id)}
                 aria-label="Remove from queue"
-                className="shrink-0 rounded-md p-1 text-slate-400 transition-colors hover:bg-surface-overlay hover:text-red-400"
+                className="shrink-0 rounded-md p-2 text-slate-400 transition-colors hover:bg-surface-overlay hover:text-red-400"
               >
                 <X className="h-4 w-4" />
               </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/auth';
 export default function ProfilePage() {
   const { status, user } = useRequireAuth();
   const setUser = useAuthStore((s) => s.setUser);
+  const [avatarBroken, setAvatarBroken] = useState(false);
 
   const {
     register,
@@ -30,6 +31,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) reset({ name: user.name, avatar: user.avatar });
+    setAvatarBroken(false);
   }, [user, reset]);
 
   if (status !== 'authenticated' || !user) return <PageSpinner />;
@@ -51,14 +53,19 @@ export default function ProfilePage() {
   const initials = user.name.slice(0, 2).toUpperCase();
 
   return (
-    <div className="mx-auto max-w-lg py-4 animate-fade-in">
+    <div className="mx-auto max-w-lg py-10 animate-fade-in">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Profile</h1>
       <p className="mt-2 text-sm text-slate-300">Manage how others see you in rooms.</p>
 
       <div className="mt-6 flex items-center gap-4">
-        {user.avatar ? (
+        {user.avatar && !avatarBroken ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={user.avatar} alt={user.name} className="h-16 w-16 rounded-full object-cover" />
+          <img
+            src={user.avatar}
+            alt={user.name}
+            className="h-16 w-16 rounded-full object-cover"
+            onError={() => setAvatarBroken(true)}
+          />
         ) : (
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-600/20 text-lg font-semibold text-brand-200">
             {initials}
@@ -70,7 +77,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
         <Input
           label="Display name"
           icon={<UserIcon className="h-4 w-4" />}

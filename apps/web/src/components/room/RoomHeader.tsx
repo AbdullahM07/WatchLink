@@ -18,14 +18,14 @@ interface Props {
 }
 
 const STATUS_LABEL: Record<RoomStatus, { text: string; dot: string }> = {
-  idle: { text: 'Idle', dot: 'bg-slate-500' },
+  idle: { text: 'Idle', dot: 'bg-slate-400' },
   connecting: { text: 'Connecting…', dot: 'bg-amber-400 animate-pulse' },
   joining: { text: 'Joining…', dot: 'bg-amber-400 animate-pulse' },
-  connected: { text: 'Connected', dot: 'bg-emerald-400' },
+  connected: { text: 'Connected', dot: 'bg-success-400' },
   reconnecting: { text: 'Reconnecting…', dot: 'bg-amber-400 animate-pulse' },
-  error: { text: 'Error', dot: 'bg-red-500' },
-  kicked: { text: 'Removed', dot: 'bg-red-500' },
-  closed: { text: 'Closed', dot: 'bg-red-500' },
+  error: { text: 'Error', dot: 'bg-danger-500' },
+  kicked: { text: 'Removed', dot: 'bg-danger-500' },
+  closed: { text: 'Closed', dot: 'bg-danger-500' },
 };
 
 export function RoomHeader({ room, amHost, status, onToggleLock, onDeleteRoom }: Props) {
@@ -101,7 +101,7 @@ export function RoomHeader({ room, amHost, status, onToggleLock, onDeleteRoom }:
               clearTimeout(deleteTimer.current);
               setDeleteArmed(false);
             }}
-            className={cn(!deleteArmed && 'text-red-400 hover:bg-red-500/10')}
+            className={cn(!deleteArmed && 'text-danger-400 hover:bg-danger-500/10')}
             title={deleteArmed ? 'Click again to confirm' : 'Delete room'}
           >
             {deleteArmed ? <Check className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}

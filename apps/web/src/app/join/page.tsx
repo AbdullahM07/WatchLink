@@ -20,11 +20,11 @@ export default function JoinPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md py-8 animate-fade-in">
+    <div className="mx-auto max-w-md py-10 animate-fade-in">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Join a room</h1>
       <p className="mt-2 text-sm text-slate-300">Enter the {ROOM_CODE_LENGTH}-character room code.</p>
 
-      <form onSubmit={submit} className="mt-8 space-y-6">
+      <form onSubmit={submit} className="mt-8 space-y-5">
         <CodeInput
           value={code}
           onChange={setCode}

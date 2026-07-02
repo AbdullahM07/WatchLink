@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Link2, ListPlus, MonitorPlay, Radio, Square } from 'lucide-react';
 import { QURAN_RADIO, resolveProvider } from '@watchlink/shared';
 import { Button } from '@/components/ui/Button';
+import { fieldClasses } from '@/components/ui/Input';
+import { cn } from '@/lib/cn';
 
 interface Props {
   onChangeMedia: (url: string) => void;
@@ -44,7 +46,7 @@ export function MediaBar({ onChangeMedia, onAddToQueue, onStop, hasMedia }: Prop
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Paste a YouTube link, a direct video / .mp3 audio file, or a live stream"
             aria-label="Media URL"
-            className="h-11 w-full rounded-xl border border-surface-border bg-surface pl-10 pr-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
+            className={cn(fieldClasses, 'h-11 w-full pl-10 pr-3 text-sm')}
           />
         </div>
         <div className="flex gap-2">

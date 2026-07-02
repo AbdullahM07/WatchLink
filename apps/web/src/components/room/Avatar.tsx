@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { cn } from '@/lib/cn';
 
 const SIZES = {
@@ -29,6 +30,7 @@ export function Avatar({
   className,
 }: Props) {
   const sizeCls = SIZES[size];
+  const [broken, setBroken] = useState(false);
   return (
     <span
       className={cn(
@@ -39,9 +41,14 @@ export function Avatar({
         className,
       )}
     >
-      {avatar ? (
+      {avatar && !broken ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={avatar} alt={name} className="h-full w-full rounded-full object-cover" />
+        <img
+          src={avatar}
+          alt={name}
+          className="h-full w-full rounded-full object-cover"
+          onError={() => setBroken(true)}
+        />
       ) : (
         <span className="flex h-full w-full items-center justify-center rounded-full bg-brand-600/25 text-brand-200">
           {name.slice(0, 2).toUpperCase()}

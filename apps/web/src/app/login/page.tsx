@@ -40,11 +40,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md py-8 animate-fade-in">
+    <div className="mx-auto max-w-md py-10 animate-fade-in">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Welcome back</h1>
       <p className="mt-2 text-sm text-slate-300">Log in to create and join watch rooms.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
         <Input
           label="Email"
           type="email"

@@ -52,7 +52,7 @@ export default function CreateRoomPage() {
   };
 
   return (
-    <div className="mx-auto max-w-lg py-4 animate-fade-in">
+    <div className="mx-auto max-w-lg py-10 animate-fade-in">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Create a room</h1>
       <p className="mt-2 text-sm text-slate-300">Set it up, then share the invite link.</p>
 

@@ -40,11 +40,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md py-8 animate-fade-in">
+    <div className="mx-auto max-w-md py-10 animate-fade-in">
       <h1 className="font-display text-3xl font-semibold tracking-tight">Create your account</h1>
       <p className="mt-2 text-sm text-slate-300">Free, and takes a few seconds.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
         <Input
           label="Name"
           autoComplete="name"

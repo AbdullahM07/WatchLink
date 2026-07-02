@@ -40,7 +40,26 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthBootstrap>{children}</AuthBootstrap>
-      <Toaster theme="dark" position="top-center" richColors closeButton />
+      <Toaster
+        theme="dark"
+        position="top-center"
+        closeButton
+        toastOptions={{
+          classNames: {
+            toast:
+              'group toast group-[.toaster]:rounded-xl group-[.toaster]:border group-[.toaster]:border-surface-border group-[.toaster]:bg-surface-raised group-[.toaster]:text-slate-100 group-[.toaster]:shadow-xl',
+            description: 'group-[.toast]:text-slate-400',
+            actionButton: 'group-[.toast]:bg-brand-600 group-[.toast]:text-white',
+            cancelButton: 'group-[.toast]:bg-surface-overlay group-[.toast]:text-slate-200',
+            closeButton:
+              'group-[.toast]:border-surface-border group-[.toast]:bg-surface-overlay group-[.toast]:text-slate-300',
+            success: 'group-[.toast]:text-accent-200',
+            error: 'group-[.toast]:text-danger-300',
+            info: 'group-[.toast]:text-brand-200',
+            warning: 'group-[.toast]:text-amber-200',
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

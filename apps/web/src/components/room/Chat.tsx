@@ -9,6 +9,9 @@ import { cn } from '@/lib/cn';
 import type { VoiceApi } from '@/hooks/useVoiceChat';
 import { IconButton } from '@/components/ui/IconButton';
 import { ConfirmDelete } from '@/components/ui/ConfirmDelete';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { fieldClasses } from '@/components/ui/Input';
+import { Avatar } from './Avatar';
 import { VoiceBar } from './VoiceBar';
 
 interface Props {
@@ -18,18 +21,6 @@ interface Props {
   voice: VoiceApi;
   onSend: (text: string) => void;
   onDelete: (messageId: string) => void;
-}
-
-function Avatar({ name, avatar }: { name: string; avatar: string | null }) {
-  if (avatar) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={avatar} alt={name} className="h-7 w-7 shrink-0 rounded-full object-cover" />;
-  }
-  return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-600/25 text-[10px] font-semibold text-brand-200">
-      {name.slice(0, 2).toUpperCase()}
-    </div>
-  );
 }
 
 export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Props) {
@@ -52,13 +43,12 @@ export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Prop
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 space-y-3 overflow-y-auto px-3 py-4">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-overlay text-slate-400">
-              <MessageSquare className="h-5 w-5" />
-            </span>
-            <p className="mt-3 text-sm text-slate-300">No messages yet</p>
-            <p className="mt-0.5 text-xs text-slate-400">Say hi to the room 👋</p>
-          </div>
+          <EmptyState
+            icon={MessageSquare}
+            title="No messages yet"
+            description="Say hi to the room 👋"
+            className="py-12"
+          />
         )}
         {messages.map((m, i) => {
           const mine = m.userId === selfId;
@@ -69,7 +59,9 @@ export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Prop
               key={m.id}
               className={cn('group flex items-end gap-2', mine && 'flex-row-reverse', grouped && 'mt-0.5')}
             >
-              <div className="w-7 shrink-0">{!grouped && !mine && <Avatar name={m.name} avatar={m.avatar} />}</div>
+              <div className="w-7 shrink-0">
+                {!grouped && !mine && <Avatar name={m.name} avatar={m.avatar} size="xs" />}
+              </div>
               <div className={cn('max-w-[78%]', mine ? 'items-end text-right' : 'items-start')}>
                 {!grouped && (
                   <div className={cn('mb-0.5 flex items-baseline gap-2 px-1', mine && 'flex-row-reverse')}>
@@ -114,7 +106,7 @@ export function Chat({ messages, selfId, amHost, voice, onSend, onDelete }: Prop
           maxLength={MAX_CHAT_LENGTH}
           placeholder="Type a message…"
           aria-label="Chat message"
-          className="h-10 flex-1 rounded-xl border border-surface-border bg-surface px-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
+          className={cn(fieldClasses, 'h-10 flex-1 px-3 text-sm')}
         />
         <IconButton type="submit" disabled={!text.trim()} variant="brand" aria-label="Send message">
           <SendHorizonal className="h-4 w-4" />

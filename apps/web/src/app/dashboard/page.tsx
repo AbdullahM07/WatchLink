@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarClock, Lock, Mail, Plus, Sparkles, Tv, Users } from 'lucide-react';
+import { AlertTriangle, CalendarClock, Lock, Mail, Plus, Sparkles, Tv, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PageSpinner, Spinner } from '@/components/ui/Spinner';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { listMyRoomsRequest } from '@/lib/rooms-api';
@@ -97,6 +98,19 @@ export default function DashboardPage() {
           <div className="flex justify-center py-10">
             <Spinner />
           </div>
+        ) : myRooms.isError ? (
+          <EmptyState
+            icon={AlertTriangle}
+            tone="warning"
+            bordered
+            title="Couldn’t load your rooms"
+            description="Something went wrong reaching the server. Check your connection and try again."
+            action={
+              <Button size="sm" variant="secondary" onClick={() => myRooms.refetch()} isLoading={myRooms.isFetching}>
+                Retry
+              </Button>
+            }
+          />
         ) : myRooms.data && myRooms.data.rooms.length > 0 ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {myRooms.data.rooms.map((room) => (
@@ -119,20 +133,18 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-surface-border bg-surface-raised/30 px-6 py-14 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500/15 text-brand-200">
-              <Tv className="h-6 w-6" />
-            </span>
-            <p className="mt-4 font-medium text-slate-200">No rooms yet</p>
-            <p className="mt-1 max-w-xs text-sm text-slate-400">
-              Spin up your first room, paste a video link, and share the invite — friends can join
-              in one tap.
-            </p>
-            <Button className="mt-5" size="sm" onClick={() => router.push('/create')}>
-              <Plus className="h-4 w-4" />
-              Create your first room
-            </Button>
-          </div>
+          <EmptyState
+            icon={Tv}
+            bordered
+            title="No rooms yet"
+            description="Spin up your first room, paste a video link, and share the invite — friends can join in one tap."
+            action={
+              <Button size="sm" onClick={() => router.push('/create')}>
+                <Plus className="h-4 w-4" />
+                Create your first room
+              </Button>
+            }
+          />
         )}
       </section>
     </div>

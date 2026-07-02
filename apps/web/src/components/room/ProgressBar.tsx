@@ -7,6 +7,7 @@ import { MAX_NOTE_LENGTH } from '@watchlink/shared';
 import { formatTimecode } from '@/lib/format';
 import type { PlayerTimeApi } from '@/lib/players/timeApi';
 import { cn } from '@/lib/cn';
+import { fieldClasses } from '@/components/ui/Input';
 
 interface Props {
   /** Reads the live player time/duration; null until the player is ready. */
@@ -101,7 +102,7 @@ export function ProgressBar({ timeApi, notes, canControl, onAddNote, onJump }: P
                 onChange={(e) => setText(e.target.value)}
                 maxLength={MAX_NOTE_LENGTH}
                 placeholder="Note at this moment…"
-                className="h-9 flex-1 rounded-lg border border-surface-border bg-surface px-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/60"
+                className={cn(fieldClasses, 'h-9 flex-1 rounded-lg px-2 text-sm')}
               />
               <button
                 type="submit"
